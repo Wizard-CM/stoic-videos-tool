@@ -1,25 +1,23 @@
 @echo off
 REM ToonForge dev server launcher (Windows)
-REM Builds frontend if needed, starts backend API, and opens the browser.
+REM Builds the frontend, starts backend API, and opens the browser.
 
 setlocal enabledelayedexpansion
 cd /d "%~dp0\.."
 set REPO_ROOT=%cd%
 set FRONTEND_DIR=%REPO_ROOT%\frontend
 set BACKEND_DIR=%REPO_ROOT%\backend
-set FRONTEND_DIST=%FRONTEND_DIR%\dist
 
 echo Starting ToonForge dev servers...
 
-REM Build frontend if dist doesn't exist
-if not exist "%FRONTEND_DIST%" (
-    echo Building frontend...
-    cd /d "%FRONTEND_DIR%"
-    call npm run build
-    if errorlevel 1 (
-        echo Frontend build failed.
-        exit /b 1
-    )
+REM Always rebuild: a stale dist\ (built before a later source change) would silently keep serving
+REM old, possibly broken code, since the server has no way to tell it's out of date.
+echo Building frontend...
+cd /d "%FRONTEND_DIR%"
+call npm run build
+if errorlevel 1 (
+    echo Frontend build failed.
+    exit /b 1
 )
 
 REM Start backend API
