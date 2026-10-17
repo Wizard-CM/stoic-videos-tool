@@ -246,6 +246,31 @@ def test_basic_provider_returns_the_contract_shape(tmp_path):
     normalize_direction(result["direction"], brief)
 
 
+def test_claude_provider_directs_and_designs_the_missing_background(tmp_path, mini_background):
+    brief = reference_brief()
+    brief["cast"]["RON"]["has_background"] = False
+    cast = {speaker: json.loads((EXAMPLES_DIR / "characters" / f"{speaker.lower()}.json").read_text(encoding="utf-8"))
+            for speaker in brief["speakers"]}
+    backgrounds = {"JADE": mini_background, "RON": None}
+    fractions = []
+
+    result = get_director_provider("claude").direct(
+        brief, tmp_path, lambda fraction, text: fractions.append(fraction), lambda: False, cast=cast, backgrounds=backgrounds,
+    )
+
+    assert set(result) == {"direction", "backgrounds", "notes", "cost_usd"}
+    normalize_direction(result["direction"], brief)
+    assert list(result["backgrounds"]) == ["RON"]
+    assert (tmp_path / "brief.json").exists()
+    for speaker in ["JADE", "RON"]:
+        assert (tmp_path / "cast" / f"{speaker}.json").exists()
+        assert (tmp_path / "previews" / f"{speaker}.png").exists()
+    assert (tmp_path / "chosen_backgrounds" / "JADE.json").exists()
+    assert not (tmp_path / "chosen_backgrounds" / "RON.json").exists()
+    assert (tmp_path / "previews" / "background_JADE.png").exists()
+    assert fractions[-1] == 1.0
+
+
 def test_unknown_director_is_a_plain_error():
     with pytest.raises(PipelineError, match="Unknown director"):
         get_director_provider("nope")

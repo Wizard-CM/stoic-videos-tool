@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import shutil
 import subprocess
@@ -207,6 +208,22 @@ def test_direction_is_cached_on_the_second_run(finished_run, cast, temp_config):
 
     assert list((project_dir / "cache" / "direction").glob("*.json")) == direction_files
     assert second_context.outputs["direct"]["direction"] == finished_run["context"].outputs["direct"]["direction"]
+
+
+def test_claude_director_renders_and_designs_the_missing_background(tmp_path, cast, temp_config, mini_background):
+    """--director claude (the fake Claude in tests) directs a project where RON has no background yet."""
+    config = dataclasses.replace(temp_config, providers={**temp_config.providers, "director": "claude"})
+    backgrounds = {"JADE": mini_background, "RON": None}
+    context = make_context(tmp_path, SMALL_SCRIPT, cast, config, output_path=tmp_path / "video.mp4", backgrounds=backgrounds)
+
+    run_pipeline(context)
+
+    directed = context.outputs["direct"]
+    assert directed["provider"] == "claude"
+    assert list(directed["generated_backgrounds"]) == ["RON"]
+    assert directed["backgrounds"]["RON"] == directed["generated_backgrounds"]["RON"]
+    assert context.outputs["timeline"]["shots"]
+    assert (tmp_path / "video.mp4").is_file()
 
 
 def test_repeated_identical_lines_do_not_break_lip_sync(tmp_path, cast, temp_config):

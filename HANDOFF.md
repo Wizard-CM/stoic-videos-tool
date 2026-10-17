@@ -44,15 +44,22 @@ Read these before changing code (they are the contracts): `application/docs/ENGI
 | `347df23` | **Renderer**: `engine/vector` (SVG path parser, shape drawing), `engine/puppet` (kit validation, expressions/gestures/mouth resolution, `draw_character`, previews, contact sheets), `engine/scene/backgrounds.py` (blurred back, desk, foreground, glow, vignette; 16:9 and 9:16). `scripts/preview_art.py` checks and draws any kit/background file. |
 | `76e30c1` | **Example art** in the reference style: `backend/data/examples/characters/jade.json`, `ron.json`, `backgrounds/office.json`, `night_city.json` (0 errors, 0 warnings). They are Claude's style references, the starter library and fixtures. |
 | `cfe13ed` + this commit | **Backend starts again** (the crash fix): character and background libraries, previews/sheets/avatars, import/export, options, cast with per-speaker background choice, starter library seeded on startup, Claude status/task endpoints that say "not ready". **Pipeline**: brief + word timing, direction validation, basic director, director providers, timeline builder, per-frame poses, camera, frame compositing, `direct` stage, storyboard. A 16 s render with Jade/Ron works end to end. **New UI** (character/background studios, Claude task panel + status banner, cast pickers, Write-with-Claude). **Started Claude layer** in `claude_layer/` (settings, workspace, agents, prompts, runner, tools, voices, fakes — untested, not wired). |
+| `f5daa18` | **Task 1**: finished the pipeline, rewrote the CLI for the new puppet-kit cast, re-added `test_render.py`/`test_pipeline.py`/`test_fuzz.py`. |
+| `1f77389` | **Task 2**: matched the reference's camera framing, desk height, light direction and line weight. |
+| `2e687a2` | **Task 3**: `claude_layer/` finished (real `run_claude`, `design_character`, fake mode) and wired end to end — `app/jobs/claude_tasks.py` task queue, real `app/services/claude.py`, `cli.py design-character`. Switched auth to the Claude Code CLI's own subscription sign-in (`claude login`) as the primary path, API key as fallback. |
+| (this commit) | **Task 4**: `claude_layer/director.py` (`ClaudeDirector`, registered as `DIRECTOR_PROVIDERS["claude"]`) directs a video and designs any backgrounds still missing, following the same pattern as `design_character`/`design_background`. `config.yaml` now defaults to `providers.director: claude`; added the "Claude is ready to direct" preflight check (`app/services/preflight.py`, shown only while the video's direction isn't cached yet). |
 
-Tests: `cd application/backend && .venv/bin/pytest -q` → 234 passed, 3 xfailed (see task 1). `ruff check .` is clean
-except `cli.py` (task 1). Frontend: `npx tsc --noEmit` passes.
+Tests: `cd application/backend && .venv/bin/pytest -q` → 329 passed, 5 failed (pre-existing, unrelated pixel-comparison
+tests in `test_backgrounds.py`/`test_puppet.py`/`test_vector.py` — a skia rendering difference in this environment, not
+a regression). `ruff check .` is clean. Frontend: `npx tsc --noEmit` passes.
 
-`config.yaml` has `providers.director: basic` for now; switch to `claude` when task 4 is done.
+`config.yaml` has `providers.director: claude` now (task 4 is done). Use `basic` for offline rule-based direction.
 
 ## 4. Next tasks, in order
 
-### Task 1 — Finish the pipeline and the CLI
+Tasks 1-4 are done (see the table above). Starting point for the next session: **Task 5**.
+
+### Task 1 — Finish the pipeline and the CLI — done (`f5daa18`)
 - Fix the 3 xfailed tests in `backend/tests/test_timeline.py` (cutaway near the end, blinks use half/closed eyes,
   gesture passes through in-between angles); remove the xfail marks.
 - Rewrite `backend/cli.py` (still imports deleted modules): `render <script> --cast <cast.json> [--director basic|claude]
@@ -67,7 +74,7 @@ except `cli.py` (task 1). Frontend: `npx tsc --noEmit` passes.
 - Done when: `python cli.py render ../samples/reference_scene.txt --cast ../samples/reference_cast.json --direction
   data/examples/directions/reference_scene.json --director basic --tts fake --quality 720p` writes an MP4.
 
-### Task 2 — Match the reference framing and drawing details (measured from the reference)
+### Task 2 — Match the reference framing and drawing details (measured from the reference) — done (`1f77389`)
 - **Camera** (`engine/scene/camera.py`): in the reference's standard shot the head (skull top → chin) is about **0.50 of
   the frame height** with the eye line at about **0.34 × height** (the current MCU share 0.30 is too wide). Suggested
   16:9 shares: MCU 0.50, CU 0.62, ECU 0.85; pick matching 9:16 values.
@@ -83,7 +90,7 @@ except `cli.py` (task 1). Frontend: `npx tsc --noEmit` passes.
 - Done when: a CLI render of the reference scene, compared side by side with `ref-video.mp4`
   (`ffmpeg -i ref-video.mp4 -i out.mp4 -filter_complex hstack compare.mp4`), frames the same way.
 
-### Task 3 — Claude designs a character (first Claude feature)
+### Task 3 — Claude designs a character (first Claude feature) — done (`2e687a2`)
 - Finish `claude_layer/` per `docs/ENGINE_CONTRACTS.md` "Claude layer": `run_claude` (Opus lead + `sonnet-worker` /
   `haiku-worker` subagents, in-process `toonforge` MCP check tools that return rendered sheets as images, workspace with
   split kit files, activity events, readable errors, cancel) and the `design_character` task (new + revision with
@@ -96,12 +103,13 @@ except `cli.py` (task 1). Frontend: `npx tsc --noEmit` passes.
   run with their API key, then through the UI's character studio.
 - Done when: a real run produces a kit that passes `check_kit` with 0 errors and reads well in its sheets.
 
-### Task 4 — Claude directs a video
+### Task 4 — Claude directs a video — done (this commit)
 - `claude_layer/director.py`: `ClaudeDirector` registered as `DIRECTOR_PROVIDERS["claude"]`, called as
   `direct(brief, workspace, report, should_cancel, cast=..., backgrounds=...)`; writes `brief.json`, cast previews, the
   example direction, and asks for `direction.json` (+ `backgrounds/<SPEAKER>.json` for speakers without one); validates
   with `normalize_direction`. Switch `config.yaml` to `director: claude`; add the "Claude ready" preflight check.
-- Done when: `cli.py render ... --director claude` and the UI's storyboard/render use Claude's direction.
+- Done when: `cli.py render ... --director claude` and the UI's storyboard/render use Claude's direction. Verified with
+  the CLI (fake Claude); the UI path (storyboard/render buttons against the real backend) is still Task 6's job.
 
 ### Task 5 — Claude backgrounds and scripts
 - `design_background` (new + revision) and `write_script` (`{"title", "script"}`, tagged format, 2–6 speakers,

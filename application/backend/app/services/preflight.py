@@ -3,6 +3,8 @@
 import os
 from pathlib import Path
 
+from app.core.paths import project_dir
+from app.services import claude as claude_service
 from app.services.options import MAX_LENGTH_S
 from engine.config import find_tool, load_config, load_data_file, piper_voices_dir
 from engine.script.parser import parse_script
@@ -58,6 +60,11 @@ def _folder_can_be_written(folder: Path) -> bool:
     return os.access(existing_folder, os.W_OK)
 
 
+def _direction_is_cached(project: dict) -> bool:
+    direction_cache_dir = project_dir(project["id"]) / "cache" / "direction"
+    return any(direction_cache_dir.glob("*.json"))
+
+
 def check_tools(project: dict) -> list[dict]:
     config = load_config()
     checks = []
@@ -75,6 +82,11 @@ def check_tools(project: dict) -> list[dict]:
     can_write = _folder_can_be_written(config.output_folder)
     folder_message = f"Videos are saved to {config.output_folder}." if can_write else f"Cannot write to {config.output_folder}."
     checks.append(_check("output_folder", "Output folder can be written", can_write, folder_message))
+
+    if config.providers.get("director") == "claude" and not _direction_is_cached(project):
+        status = claude_service.get_status()
+        checks.append(_check("claude", "Claude is ready to direct", status["ready"], status["message"]))
+
     return checks
 
 
