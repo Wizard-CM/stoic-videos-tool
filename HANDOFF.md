@@ -47,17 +47,52 @@ Read these before changing code (they are the contracts): `application/docs/ENGI
 | `f5daa18` | **Task 1**: finished the pipeline, rewrote the CLI for the new puppet-kit cast, re-added `test_render.py`/`test_pipeline.py`/`test_fuzz.py`. |
 | `1f77389` | **Task 2**: matched the reference's camera framing, desk height, light direction and line weight. |
 | `2e687a2` | **Task 3**: `claude_layer/` finished (real `run_claude`, `design_character`, fake mode) and wired end to end — `app/jobs/claude_tasks.py` task queue, real `app/services/claude.py`, `cli.py design-character`. Switched auth to the Claude Code CLI's own subscription sign-in (`claude login`) as the primary path, API key as fallback. |
-| (this commit) | **Task 4**: `claude_layer/director.py` (`ClaudeDirector`, registered as `DIRECTOR_PROVIDERS["claude"]`) directs a video and designs any backgrounds still missing, following the same pattern as `design_character`/`design_background`. `config.yaml` now defaults to `providers.director: claude`; added the "Claude is ready to direct" preflight check (`app/services/preflight.py`, shown only while the video's direction isn't cached yet). |
+| `43e6cc9` | **Task 4**: `claude_layer/director.py` (`ClaudeDirector`, registered as `DIRECTOR_PROVIDERS["claude"]`) directs a video and designs any backgrounds still missing, following the same pattern as `design_character`/`design_background`. `config.yaml` now defaults to `providers.director: claude`; added the "Claude is ready to direct" preflight check (`app/services/preflight.py`, shown only while the video's direction isn't cached yet). |
+| `f0a3235` | **Bug fix**: the real storyboard run was crashing with "Claude Code sent output the app couldn't read" — see §4a, read it before touching `claude_layer/runner.py` again. Also trimmed the direction task's prompt/workspace to skip `PUPPET_KIT.md` and the background examples when no speaker is missing a background. |
 
-Tests: `cd application/backend && .venv/bin/pytest -q` → 329 passed, 5 failed (pre-existing, unrelated pixel-comparison
+Tests: `cd application/backend && .venv/bin/pytest -q` → 330 passed, 5 failed (pre-existing, unrelated pixel-comparison
 tests in `test_backgrounds.py`/`test_puppet.py`/`test_vector.py` — a skia rendering difference in this environment, not
 a regression). `ruff check .` is clean. Frontend: `npx tsc --noEmit` passes.
 
 `config.yaml` has `providers.director: claude` now (task 4 is done). Use `basic` for offline rule-based direction.
 
+### 4a. Bug fixed this session: the storyboard crash in the screenshot
+
+The user hit "Claude Code sent output the app couldn't read. Update ToonForge (and claude-agent-sdk) and try again."
+on a real storyboard run (`application/storage/projects/p-89d2c3`, direct stage). Root cause, confirmed against the
+installed SDK's source (not a guess):
+
+- `claude_layer/runner.py` annotates the `toonforge` tools with `maxResultSizeChars=MAX_TOOL_RESULT_CHARS` (4,000,000
+  chars) so check/preview tools can return large rendered PNGs inline for Claude to look at.
+- But `build_options()` never set `ClaudeAgentOptions.max_buffer_size`, so the SDK's subprocess transport
+  (`claude_agent_sdk/_internal/transport/subprocess_cli.py`) used its own default cap of **1 MB per stdout JSON
+  message**. Any tool result between ~1 MB and 4 MB (any decent-sized rendered preview/contact-sheet image) blew that
+  cap and raised `CLIJSONDecodeError` — which is literally the same class as the transport's internal
+  `SDKJSONDecodeError` (`from ..._errors import CLIJSONDecodeError as SDKJSONDecodeError`) — and `runner.py` maps that
+  straight to the `BAD_OUTPUT` message the user saw.
+- Evidence: both real failed runs in `application/storage/projects/p-89d2c3/work/director/88cee26eb73423108e8d/
+  activity.jsonl` crashed within ~6 seconds of a `check_background`/preview tool call returning an image, with no
+  further activity logged (because the SDK failed to parse the very message that would have logged it).
+- **Fix**: `claude_layer/runner.py` now sets `"max_buffer_size": MAX_SDK_BUFFER_BYTES` (8,000,000, comfortably above
+  `MAX_TOOL_RESULT_CHARS`) in `build_options()`. This applies to every Claude task (character, background, script,
+  direction), not just directing.
+- **Not yet verified against a real Claude run** (only unit/fake-mode tests + reading the SDK source — the user was
+  close to their Claude session limit, so a live Opus-led storyboard run was deliberately skipped this session). First
+  thing to do next session: have the user click "Try again" on the stuck project (or start a new storyboard render)
+  and confirm it gets past the `direct` stage. If it still fails with the same message, re-read this section before
+  assuming it's a new bug — check whether the failing tool result is unusually large (over 8 MB) and raise
+  `MAX_SDK_BUFFER_BYTES` further, or shrink what the previews/contact sheets render at.
+
 ## 4. Next tasks, in order
 
-Tasks 1-4 are done (see the table above). Starting point for the next session: **Task 5**.
+Tasks 1-4 are done (see the table above), plus the bug fix in §4a. Starting point for the next session: confirm §4a's
+fix with a real run, then **Task 5**.
+
+**Housekeeping:** `git status` currently shows some untracked files that are not part of any task — a bug-report
+screenshot, `start.md`/`tasks.md` (look like the user's own scratch notes), and `application/storage/backgrounds/` +
+`application/storage/characters/jade-example.json`/`ron-example.json` (runtime library data saved by the app while the
+user was testing through the UI, not example/fixture data). Leave them alone unless the user asks — don't commit them
+as part of unrelated task work.
 
 ### Task 1 — Finish the pipeline and the CLI — done (`f5daa18`)
 - Fix the 3 xfailed tests in `backend/tests/test_timeline.py` (cutaway near the end, blinks use half/closed eyes,
@@ -142,6 +177,9 @@ Tasks 1-4 are done (see the table above). Starting point for the next session: *
   the primary path, not an API key — don't gate anything on `ANTHROPIC_API_KEY` being set. `claude auth status --json`
   prints `{"loggedIn": bool, "authMethod": ..., "subscriptionType": ...}`; `ANTHROPIC_API_KEY` (config
   `claude.api_key_env`) still works as a fallback.
+- `ClaudeAgentOptions.max_buffer_size` (bytes) caps a single stdout JSON message from the CLI subprocess; the
+  transport's own default is 1 MB and raises `CLIJSONDecodeError` past it, regardless of any tool's own
+  `maxResultSizeChars` annotation. `runner.py` sets it explicitly now — see §4a before changing either number.
 
 ## 6. Running things
 
