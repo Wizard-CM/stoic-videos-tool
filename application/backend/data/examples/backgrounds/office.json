@@ -1,0 +1,596 @@
+{
+ "id": "office-example",
+ "name": "Green office",
+ "description": "A quiet executive office: deep-green paneled wall with moldings, a framed abstract print (orange circle, navy and yellow squares) on the right, warm lamp glow from the upper right, a wooden desk edge, and the dark blurred shoulder of the person across the desk in the lower-left corner.",
+ "art": {
+  "format": "toonforge-background/1",
+  "canvas": [
+   1920,
+   1080
+  ],
+  "palette": {
+   "wall": "#265951",
+   "wall_dark": "#183F38",
+   "panel": "#2A5F56",
+   "molding_hi": "#3B7A6B",
+   "molding_lo": "#163A33",
+   "frame": "#AE914C",
+   "frame_hi": "#D6B86C",
+   "frame_lo": "#7A6230",
+   "mat": "#E4D1AB",
+   "orange": "#C45F42",
+   "navy": "#313C51",
+   "yellow": "#D1A244",
+   "shadow": "#0C1F1B"
+  },
+  "back": [
+   {
+    "d": "M 0 0 L 1920 0 L 1920 1080 L 0 1080 Z",
+    "fill": {
+     "linear": [
+      [
+       0,
+       0
+      ],
+      [
+       1920,
+       0
+      ]
+     ],
+     "stops": [
+      [
+       0,
+       "#285C53"
+      ],
+      [
+       0.55,
+       "#22524A"
+      ],
+      [
+       1,
+       "#1B463F"
+      ]
+     ]
+    }
+   },
+   {
+    "d": "M -60 70 L 170 70 L 170 650 L -60 650 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M -60 650 L -60 70 L 170 70",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M -51 641 L -51 79 L 161 79",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 170 70 L 170 650 L -60 650",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 161 79 L 161 641 L -51 641",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M -60 730 L 170 730 L 170 1040 L -60 1040 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M -60 1040 L -60 730 L 170 730",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M -51 1031 L -51 739 L 161 739",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 170 730 L 170 1040 L -60 1040",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 161 739 L 161 1031 L -51 1031",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 250 70 L 520 70 L 520 650 L 250 650 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 250 650 L 250 70 L 520 70",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 259 641 L 259 79 L 511 79",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 520 70 L 520 650 L 250 650",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 511 79 L 511 641 L 259 641",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 250 730 L 520 730 L 520 1040 L 250 1040 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 250 1040 L 250 730 L 520 730",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 259 1031 L 259 739 L 511 739",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 520 730 L 520 1040 L 250 1040",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 511 739 L 511 1031 L 259 1031",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 600 70 L 870 70 L 870 650 L 600 650 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 600 650 L 600 70 L 870 70",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 609 641 L 609 79 L 861 79",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 870 70 L 870 650 L 600 650",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 861 79 L 861 641 L 609 641",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 600 730 L 870 730 L 870 1040 L 600 1040 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 600 1040 L 600 730 L 870 730",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 609 1031 L 609 739 L 861 739",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 870 730 L 870 1040 L 600 1040",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 861 739 L 861 1031 L 609 1031",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 950 70 L 1220 70 L 1220 650 L 950 650 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 950 650 L 950 70 L 1220 70",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 959 641 L 959 79 L 1211 79",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1220 70 L 1220 650 L 950 650",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 1211 79 L 1211 641 L 959 641",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 950 730 L 1220 730 L 1220 1040 L 950 1040 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 950 1040 L 950 730 L 1220 730",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 959 1031 L 959 739 L 1211 739",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1220 730 L 1220 1040 L 950 1040",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 1211 739 L 1211 1031 L 959 1031",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1300 70 L 1570 70 L 1570 650 L 1300 650 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 1300 650 L 1300 70 L 1570 70",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1309 641 L 1309 79 L 1561 79",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1570 70 L 1570 650 L 1300 650",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 1561 79 L 1561 641 L 1309 641",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1300 730 L 1570 730 L 1570 1040 L 1300 1040 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 1300 1040 L 1300 730 L 1570 730",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1309 1031 L 1309 739 L 1561 739",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1570 730 L 1570 1040 L 1300 1040",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 1561 739 L 1561 1031 L 1309 1031",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1650 70 L 1920 70 L 1920 650 L 1650 650 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 1650 650 L 1650 70 L 1920 70",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1659 641 L 1659 79 L 1911 79",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1920 70 L 1920 650 L 1650 650",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 1911 79 L 1911 641 L 1659 641",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1650 730 L 1920 730 L 1920 1040 L 1650 1040 Z",
+    "fill": "$panel"
+   },
+   {
+    "d": "M 1650 1040 L 1650 730 L 1920 730",
+    "stroke": "$molding_lo",
+    "width": 14,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1659 1031 L 1659 739 L 1911 739",
+    "stroke": "$molding_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1920 730 L 1920 1040 L 1650 1040",
+    "stroke": "$molding_hi",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter",
+    "opacity": 0.55
+   },
+   {
+    "d": "M 1911 739 L 1911 1031 L 1659 1031",
+    "stroke": "$molding_lo",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 0 676 L 1920 676 L 1920 704 L 0 704 Z",
+    "fill": "#2C6559"
+   },
+   {
+    "d": "M 0 676 L 1920 676",
+    "stroke": "$molding_hi",
+    "width": 6
+   },
+   {
+    "d": "M 0 704 L 1920 704",
+    "stroke": "$molding_lo",
+    "width": 8
+   },
+   {
+    "d": "M 0 0 L 1920 0 L 1920 1080 L 0 1080 Z",
+    "fill": {
+     "linear": [
+      [
+       0,
+       520
+      ],
+      [
+       0,
+       1080
+      ]
+     ],
+     "stops": [
+      [
+       0,
+       "#0C1F1B00"
+      ],
+      [
+       1,
+       "#0C1F1B99"
+      ]
+     ]
+    }
+   },
+   {
+    "d": "M 0 0 L 1920 0 L 1920 1080 L 0 1080 Z",
+    "fill": {
+     "radial": [
+      1620,
+      40
+     ],
+     "r": 900,
+     "stops": [
+      [
+       0,
+       "#9FB07A66"
+      ],
+      [
+       0.45,
+       "#7E9A6A2E"
+      ],
+      [
+       1,
+       "#7E9A6A00"
+      ]
+     ]
+    }
+   },
+   {
+    "d": "M 0 0 L 1920 0 L 1920 40 L 0 40 Z",
+    "fill": "#10261F",
+    "opacity": 0.6
+   },
+   {
+    "d": "M 1438 104 L 1918 104 L 1918 724 L 1438 724 Z",
+    "fill": "$shadow",
+    "opacity": 0.45,
+    "blur": 16
+   },
+   {
+    "d": "M 1424 84 L 1904 84 L 1904 704 L 1424 704 Z",
+    "fill": "$frame",
+    "stroke": "$frame_lo",
+    "width": 6
+   },
+   {
+    "d": "M 1430 698 L 1430 90 L 1898 90",
+    "stroke": "$frame_hi",
+    "width": 6,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1452 112 L 1876 112 L 1876 676 L 1452 676 Z",
+    "fill": "$mat",
+    "stroke": "$frame_lo",
+    "width": 4
+   },
+   {
+    "d": "M 1452 676 L 1452 112 L 1876 112",
+    "stroke": "#C9B48C",
+    "width": 8,
+    "cap": "butt",
+    "join": "miter"
+   },
+   {
+    "d": "M 1712 322 A 112 112 0 1 0 1488 322 A 112 112 0 1 0 1712 322 Z",
+    "fill": "$orange"
+   },
+   {
+    "d": "M 1656 392 L 1838 392 L 1838 622 L 1656 622 Z",
+    "fill": "$navy"
+   },
+   {
+    "d": "M 1490 516 L 1620 516 L 1620 640 L 1490 640 Z",
+    "fill": "$yellow"
+   }
+  ],
+  "blur": 7,
+  "subject_x": 0.4,
+  "desk": {
+   "top": "#7A4A30",
+   "front": "#55301E",
+   "highlight": "#B07A52",
+   "thickness": 0.035
+  },
+  "foreground": [
+   {
+    "d": "M -60 1140 L -60 700 C -10 660 70 672 118 730 C 160 782 178 880 190 1140 Z",
+    "fill": "#0A1024"
+   },
+   {
+    "d": "M -60 700 C -10 660 70 672 118 730 C 150 770 166 830 176 900",
+    "stroke": "#25335A",
+    "width": 14,
+    "opacity": 0.7
+   }
+  ],
+  "foreground_blur": 22,
+  "glow": {
+   "color": "#FFD9A0",
+   "x": 0.86,
+   "y": 0.08,
+   "radius": 0.6,
+   "strength": 0.2
+  },
+  "vignette": 0.3
+ },
+ "made_by": null
+}
