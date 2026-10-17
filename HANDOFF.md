@@ -49,8 +49,9 @@ Read these before changing code (they are the contracts): `application/docs/ENGI
 | `2e687a2` | **Task 3**: `claude_layer/` finished (real `run_claude`, `design_character`, fake mode) and wired end to end — `app/jobs/claude_tasks.py` task queue, real `app/services/claude.py`, `cli.py design-character`. Switched auth to the Claude Code CLI's own subscription sign-in (`claude login`) as the primary path, API key as fallback. |
 | `43e6cc9` | **Task 4**: `claude_layer/director.py` (`ClaudeDirector`, registered as `DIRECTOR_PROVIDERS["claude"]`) directs a video and designs any backgrounds still missing, following the same pattern as `design_character`/`design_background`. `config.yaml` now defaults to `providers.director: claude`; added the "Claude is ready to direct" preflight check (`app/services/preflight.py`, shown only while the video's direction isn't cached yet). |
 | `f0a3235` | **Bug fix**: the real storyboard run was crashing with "Claude Code sent output the app couldn't read" — see §4a, read it before touching `claude_layer/runner.py` again. Also trimmed the direction task's prompt/workspace to skip `PUPPET_KIT.md` and the background examples when no speaker is missing a background. |
+| `0f09bcf` | **Task 5**: `claude_layer/script.py` (`write_script`), `app/services/backgrounds.py::save_new_background`, and `app/jobs/claude_tasks.py` generalized from character-only dispatch to all five kinds (character, character_revision, background, background_revision, script). The HTTP endpoints were already routed from an earlier session; only the task-layer plumbing was missing. `use_library` casts from the full character library (confirmed against `docs/API.md`), not the current project's cast. |
 
-Tests: `cd application/backend && .venv/bin/pytest -q` → 330 passed, 5 failed (pre-existing, unrelated pixel-comparison
+Tests: `cd application/backend && .venv/bin/pytest -q` → 333 passed, 5 failed (pre-existing, unrelated pixel-comparison
 tests in `test_backgrounds.py`/`test_puppet.py`/`test_vector.py` — a skia rendering difference in this environment, not
 a regression). `ruff check .` is clean. Frontend: `npx tsc --noEmit` passes.
 
@@ -76,17 +77,35 @@ installed SDK's source (not a guess):
 - **Fix**: `claude_layer/runner.py` now sets `"max_buffer_size": MAX_SDK_BUFFER_BYTES` (8,000,000, comfortably above
   `MAX_TOOL_RESULT_CHARS`) in `build_options()`. This applies to every Claude task (character, background, script,
   direction), not just directing.
-- **Not yet verified against a real Claude run** (only unit/fake-mode tests + reading the SDK source — the user was
-  close to their Claude session limit, so a live Opus-led storyboard run was deliberately skipped this session). First
-  thing to do next session: have the user click "Try again" on the stuck project (or start a new storyboard render)
-  and confirm it gets past the `direct` stage. If it still fails with the same message, re-read this section before
-  assuming it's a new bug — check whether the failing tool result is unusually large (over 8 MB) and raise
-  `MAX_SDK_BUFFER_BYTES` further, or shrink what the previews/contact sheets render at.
+- **Verified this session** with a real Claude-directed run (Jade/Ron, no backgrounds given, `--director claude`):
+  completed in ~9 min, 14 turns, $3.70, 35 shots, MP4 written; `check_background`/`check_direction` tool calls kept
+  returning images with activity continuing after each one (the exact point the old crash died silently). A direct
+  A/B test (one in-process tool returning a 1.92 MB payload) reproduced `CLIJSONDecodeError` at the SDK's 1 MB default
+  with `max_buffer_size` unset, and succeeded with it set to `MAX_SDK_BUFFER_BYTES`. Offline, the original crashed
+  workspace's `check_direction` result measures 1.79 MB — above the old 1 MB cap (explains the crash), comfortably
+  below the new 8 MB one. `p-89d2c3` itself was not re-run (a fresh CLI render was used instead to keep the repro
+  controlled) — **clicking "Try again" on it in the UI is still worth doing once, as the final real-world check**, but
+  there is no remaining reason to expect it to fail.
+
+### 4b. New finding this session: headless Claude runs can write into this repo's real Claude Code memory
+
+Not part of any task — found while verifying §4a, flagging for whoever picks this up. A live `claude_layer` director
+run (via `claude_agent_sdk`, `setting_sources=[]`) wrote a new file into
+`~/.claude/projects/-Users-<you>-Desktop-Local-Automation-new-stoic-application/memory/` — the **same** persistent
+memory store this repo's own Claude Code sessions read on startup — despite `setting_sources=[]`, which should have
+kept the headless run from touching anything outside its task workspace. The write was auto-memory, not a `toonforge`
+tool; `setting_sources=[]` apparently only gates settings/CLAUDE.md *loading*, not this. It was removed after
+verifying it wasn't anything sensitive (a plausible-looking note about the example kits' point-gesture screen
+geography), but the mechanism is still live: any real character/background/script/direction task run through
+`claude_layer/runner.py` could do this again and silently accumulate unrelated content in a human's real memory
+store. Worth a real fix before this ships beyond local dev — likely candidates: an env var override in
+`runner.py::claude_env(settings)` to redirect `CLAUDE_CONFIG_DIR`/`HOME` for the subprocess to an isolated, disposable
+location, or whatever flag disables Claude Code's auto-memory outright. Not investigated further this session.
 
 ## 4. Next tasks, in order
 
-Tasks 1-4 are done (see the table above), plus the bug fix in §4a. Starting point for the next session: confirm §4a's
-fix with a real run, then **Task 5**.
+Tasks 1-5 are done (see the table above), plus the bug fix in §4a (verified) and the finding in §4b (not fixed).
+Starting point for the next session: **Task 6**, and decide whether/when to address §4b.
 
 **Housekeeping:** `git status` currently shows some untracked files that are not part of any task — a bug-report
 screenshot, `start.md`/`tasks.md` (look like the user's own scratch notes), and `application/storage/backgrounds/` +
@@ -146,10 +165,13 @@ as part of unrelated task work.
 - Done when: `cli.py render ... --director claude` and the UI's storyboard/render use Claude's direction. Verified with
   the CLI (fake Claude); the UI path (storyboard/render buttons against the real backend) is still Task 6's job.
 
-### Task 5 — Claude backgrounds and scripts
-- `design_background` (new + revision) and `write_script` (`{"title", "script"}`, tagged format, 2–6 speakers,
-  short/medium/long, optional library cast) tasks + their endpoints (already routed; `start_task` kinds `background`,
-  `background_revision`, `script`).
+### Task 5 — Claude backgrounds and scripts — done (`0f09bcf`)
+- `design_background` (new + revision) already existed; added `write_script` (`{"title", "script"}`, tagged format,
+  2–6 speakers, short/medium/long, optional library cast) and wired all three into `start_task`'s dispatch, which had
+  stayed character-only. Endpoints were already routed from an earlier session.
+- Done when: `pytest` covers a background task saving a new background, a background revision keeping its id, and a
+  script task producing a parseable script with the library cast — verified with the CLI (fake Claude); the UI path
+  (Write with Claude, background generate/revise) is still Task 6's job.
 
 ### Task 6 — UI end to end with Claude
 - Try every screen against the real backend (character studio generate → preview → revise; cast + background choice;
