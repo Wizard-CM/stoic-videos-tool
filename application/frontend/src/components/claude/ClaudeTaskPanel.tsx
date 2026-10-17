@@ -47,7 +47,7 @@ function getQueuedMessage(task: ClaudeTask | null) {
 
 function FinishedActions({ controller, dismissLabel }: { controller: ClaudeTaskController; dismissLabel: string }) {
   const { task, isStarting, isFinishing, finishError } = controller;
-  if (!task) return null;
+  if (!task || isTaskActive(task)) return null;
 
   if (task.state === "done") {
     if (isFinishing) return <p className="m-0 text-sm text-muted">Loading the result…</p>;

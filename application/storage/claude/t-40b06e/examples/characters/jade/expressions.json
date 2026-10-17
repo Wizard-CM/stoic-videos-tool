@@ -1,0 +1,411 @@
+{
+ "expressions": {
+  "neutral": {
+   "eyes": "open",
+   "brows": {
+    "raise": 0,
+    "angle": 0
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "neutral_X",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "happy": {
+   "eyes": "glad",
+   "brows": {
+    "raise": 6,
+    "angle": -4
+   },
+   "mouth_mood": "happy",
+   "rest_mouth": "smile",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 2,
+    "nod": 0
+   }
+  },
+  "excited": {
+   "eyes": "wide",
+   "brows": {
+    "raise": 14,
+    "angle": -6
+   },
+   "mouth_mood": "happy",
+   "rest_mouth": "grin",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 3,
+    "nod": -4
+   }
+  },
+  "sad": {
+   "eyes": "sad",
+   "brows": {
+    "raise": 4,
+    "angle": -14,
+    "state": "worried"
+   },
+   "mouth_mood": "sad",
+   "rest_mouth": "frown",
+   "decals": [],
+   "gaze": [
+    0,
+    0.5
+   ],
+   "head": {
+    "tilt": -3,
+    "nod": 6
+   }
+  },
+  "angry": {
+   "eyes": "angry",
+   "brows": {
+    "raise": -6,
+    "angle": 8,
+    "state": "angry"
+   },
+   "mouth_mood": "angry",
+   "rest_mouth": "frown",
+   "decals": [
+    "stress_marks"
+   ],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 5
+   }
+  },
+  "furious": {
+   "eyes": "furious",
+   "brows": {
+    "raise": -10,
+    "angle": 14,
+    "state": "angry"
+   },
+   "mouth_mood": "angry",
+   "rest_mouth": "grit",
+   "decals": [
+    "stress_marks",
+    "anger_vein"
+   ],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": -2,
+    "nod": 8
+   }
+  },
+  "surprised": {
+   "eyes": "wide",
+   "brows": {
+    "raise": 16,
+    "angle": -4
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "shock",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": -6
+   }
+  },
+  "shocked": {
+   "eyes": "shocked",
+   "brows": {
+    "raise": 22,
+    "angle": -6
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "gasp",
+   "decals": [
+    "sweat"
+   ],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": -8
+   }
+  },
+  "scared": {
+   "eyes": "wide",
+   "brows": {
+    "raise": 12,
+    "angle": -14,
+    "state": "worried"
+   },
+   "mouth_mood": "sad",
+   "rest_mouth": "grimace",
+   "decals": [
+    "sweat"
+   ],
+   "gaze": [
+    -0.5,
+    0
+   ],
+   "head": {
+    "tilt": -2,
+    "nod": 4
+   }
+  },
+  "smug": {
+   "eyes": "smug",
+   "brows": {
+    "raise": 2,
+    "angle": 0,
+    "state": "skeptic"
+   },
+   "mouth_mood": "happy",
+   "rest_mouth": "smirk",
+   "decals": [],
+   "gaze": [
+    0.35,
+    0
+   ],
+   "head": {
+    "tilt": 4,
+    "nod": -3
+   }
+  },
+  "confused": {
+   "eyes": "open",
+   "brows": {
+    "raise": 4,
+    "angle": -2,
+    "state": "skeptic"
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "unsure",
+   "decals": [],
+   "gaze": [
+    0.3,
+    -0.2
+   ],
+   "head": {
+    "tilt": -6,
+    "nod": 0
+   }
+  },
+  "thinking": {
+   "eyes": "open",
+   "brows": {
+    "raise": 4,
+    "angle": 0,
+    "state": "skeptic"
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "pout",
+   "decals": [],
+   "gaze": [
+    0.6,
+    -0.7
+   ],
+   "head": {
+    "tilt": 4,
+    "nod": 0
+   }
+  },
+  "glare": {
+   "eyes": "angry",
+   "brows": {
+    "raise": -8,
+    "angle": 12,
+    "state": "angry"
+   },
+   "mouth_mood": "angry",
+   "rest_mouth": "frown",
+   "decals": [
+    "stress_marks"
+   ],
+   "gaze": [
+    -0.2,
+    0.15
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 7
+   }
+  },
+  "eye_roll": {
+   "eyes": "half",
+   "brows": {
+    "raise": 6,
+    "angle": -4
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "flat",
+   "decals": [],
+   "gaze": [
+    0.4,
+    -1
+   ],
+   "head": {
+    "tilt": -4,
+    "nod": 0
+   }
+  },
+  "deadpan": {
+   "eyes": "half",
+   "brows": {
+    "raise": -2,
+    "angle": 0
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "flat",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "embarrassed": {
+   "eyes": "glad",
+   "brows": {
+    "raise": 4,
+    "angle": -8,
+    "state": "worried"
+   },
+   "mouth_mood": "happy",
+   "rest_mouth": "smile",
+   "decals": [
+    "blush"
+   ],
+   "gaze": [
+    -0.5,
+    0.5
+   ],
+   "head": {
+    "tilt": -4,
+    "nod": 4
+   }
+  },
+  "worried": {
+   "eyes": "open",
+   "brows": {
+    "raise": 6,
+    "angle": -14,
+    "state": "worried"
+   },
+   "mouth_mood": "sad",
+   "rest_mouth": "grimace",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": -2,
+    "nod": 0
+   }
+  },
+  "laughing": {
+   "eyes": "happy",
+   "brows": {
+    "raise": 10,
+    "angle": -4
+   },
+   "mouth_mood": "happy",
+   "rest_mouth": "grin",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 5,
+    "nod": -5
+   }
+  },
+  "crying": {
+   "eyes": "sad",
+   "brows": {
+    "raise": 6,
+    "angle": -16,
+    "state": "worried"
+   },
+   "mouth_mood": "sad",
+   "rest_mouth": "frown",
+   "decals": [
+    "tear"
+   ],
+   "gaze": [
+    0,
+    0.5
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 6
+   }
+  },
+  "gloomy": {
+   "eyes": "half",
+   "brows": {
+    "raise": -4,
+    "angle": -6
+   },
+   "mouth_mood": "sad",
+   "rest_mouth": "frown",
+   "decals": [
+    "shadow_eyes"
+   ],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 6
+   }
+  },
+  "wink": {
+   "eyes": "wink",
+   "brows": {
+    "raise": 6,
+    "angle": 0,
+    "state": "skeptic"
+   },
+   "mouth_mood": "happy",
+   "rest_mouth": "smirk",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 4,
+    "nod": 0
+   }
+  }
+ }
+}

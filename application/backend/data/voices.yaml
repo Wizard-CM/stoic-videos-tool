@@ -1,6 +1,7 @@
 # Piper voices bundled in vendor/piper_voices/. Add a voice by dropping its .onnx + .onnx.json
 # files there and adding an entry here.
 # ages: age groups this voice is auto-picked for (child, young, adult, middle, elderly).
+# openspeaker_voice: the matching voice_id on the OpenSpeaker API (engine/tts/openspeaker.py).
 
 voices:
   - id: ryan
@@ -8,41 +9,49 @@ voices:
     gender: male
     ages: [adult, middle]
     model: en_US-ryan-medium
+    openspeaker_voice: edge_en-US-AndrewNeural
   - id: joe
     name: Joe
     gender: male
     ages: [young, child, adult]
     model: en_US-joe-medium
+    openspeaker_voice: edge_en-US-ChristopherNeural
   - id: john
     name: John
     gender: male
     ages: [middle, adult]
     model: en_US-john-medium
+    openspeaker_voice: edge_en-US-EricNeural
   - id: norman
     name: Norman
     gender: male
     ages: [elderly, middle]
     model: en_US-norman-medium
+    openspeaker_voice: edge_en-US-BrianNeural
   - id: amy
     name: Amy
     gender: female
     ages: [adult, young]
     model: en_US-amy-medium
+    openspeaker_voice: edge_en-US-AvaNeural
   - id: kristin
     name: Kristin
     gender: female
     ages: [young, child, adult]
     model: en_US-kristin-medium
+    openspeaker_voice: edge_en-US-AnaNeural
   - id: hazel
     name: Hazel
     gender: female
     ages: [middle, adult]
     model: en_US-hfc_female-medium
+    openspeaker_voice: edge_en-US-EmmaNeural
   - id: kathleen
     name: Kathleen
     gender: female
     ages: [elderly, middle]
     model: en_US-kathleen-low
+    openspeaker_voice: edge_en-US-AriaNeural
 
 # Extra pitch (semitones) by age group, added on top of the character's pitch slider.
 age_pitch:

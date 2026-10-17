@@ -208,7 +208,7 @@ export type ClaudeTask = {
   activity: ClaudeActivity[];
   result: ClaudeTaskResult | null;
   error: string | null;
-  cost_usd: number;
+  cost_usd: number | null;
   started_at: string;
   updated_at: string;
 };

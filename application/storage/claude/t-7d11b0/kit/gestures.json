@@ -1,0 +1,276 @@
+{
+ "gestures": {
+  "rest": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "point": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -20,
+    "elbow": 150,
+    "hand": "point",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "idea": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -25,
+    "elbow": 85,
+    "hand": "point",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "point_side": {
+   "left": {
+    "shoulder": 65,
+    "elbow": 103,
+    "hand": "point",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "open_palm": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -10,
+    "elbow": 95,
+    "hand": "open",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "shrug": {
+   "left": {
+    "shoulder": -12,
+    "elbow": -128,
+    "hand": "palm_up",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": 12,
+    "elbow": 128,
+    "hand": "palm_up",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "fist": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -15,
+    "elbow": 60,
+    "hand": "fist",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "chin": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": 85,
+    "elbow": -14,
+    "hand": "chin",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "chest": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": 65,
+    "elbow": -35,
+    "hand": "flat",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "clasp": {
+   "left": {
+    "shoulder": -45,
+    "elbow": 13,
+    "hand": "clasp",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": 45,
+    "elbow": -13,
+    "hand": "rest",
+    "hide_hand": true,
+    "behind": false
+   }
+  },
+  "wave": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -30,
+    "elbow": 133,
+    "hand": "open",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "count": {
+   "left": {
+    "shoulder": 45,
+    "elbow": -50,
+    "hand": "count",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "thumbs_up": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -40,
+    "elbow": 40,
+    "hand": "thumb_up",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "both_palms": {
+   "left": {
+    "shoulder": 15,
+    "elbow": -83,
+    "hand": "open",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -15,
+    "elbow": 83,
+    "hand": "open",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "fist_pump": {
+   "left": {
+    "shoulder": 70,
+    "elbow": -160,
+    "hand": "fist",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -70,
+    "elbow": 160,
+    "hand": "fist",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "head_scratch": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -109,
+    "elbow": -171,
+    "hand": "scratch",
+    "hide_hand": false,
+    "behind": false
+   }
+  },
+  "hands_up": {
+   "left": {
+    "shoulder": 50,
+    "elbow": -132,
+    "hand": "open",
+    "hide_hand": false,
+    "behind": false
+   },
+   "right": {
+    "shoulder": -50,
+    "elbow": 132,
+    "hand": "open",
+    "hide_hand": false,
+    "behind": false
+   }
+  }
+ }
+}

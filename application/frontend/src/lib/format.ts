@@ -52,8 +52,9 @@ export function capitalize(text: string) {
   return lowerCaseText.charAt(0).toUpperCase() + lowerCaseText.slice(1);
 }
 
-// "$0.73", "<$0.01"
-export function formatCost(usd: number) {
+// "$0.73", "<$0.01", "—" while a task is still running and its cost isn't known yet
+export function formatCost(usd: number | null) {
+  if (usd === null) return "—";
   if (usd > 0 && usd < 0.01) return "<$0.01";
   return `$${usd.toFixed(2)}`;
 }

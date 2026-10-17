@@ -1,0 +1,15 @@
+{
+ "idea": "Two coworkers argue over who forgot to submit the quarterly report, and it turns out neither of them did.",
+ "length": "short",
+ "target_seconds": 30,
+ "characters": [
+  {
+   "name": "Jade",
+   "description": "A sharp, no-nonsense project lead in her thirties: warm brown skin, long straight black hair parted to one side, big green eyes, teal diamond earrings, a charcoal blazer over an emerald blouse; quick to anger when someone goes behind her back."
+  },
+  {
+   "name": "Ron",
+   "description": "A silver-haired executive in his sixties with bushy grey brows, steel-blue eyes, a navy suit and red tie; smug, unhurried and used to getting his way."
+  }
+ ]
+}

@@ -1,0 +1,78 @@
+{
+ "format": "toonforge-kit/1",
+ "canvas": [
+  1000,
+  1000
+ ],
+ "style": {
+  "outline": "#1A1020",
+  "outline_width": 3
+ },
+ "palette": {
+  "skin": "#E0AA86",
+  "skin_shade": "#CC9474",
+  "skin_deep": "#B4785A",
+  "cheek": "#D28A6E",
+  "nose_hi": "#F2CAAE",
+  "wrinkle": "#9A5C46",
+  "hair": "#D6DCE8",
+  "hair_shade": "#B4BBCC",
+  "hair_line": "#8E95AE",
+  "brow": "#6C788A",
+  "brow_dark": "#4E586C",
+  "iris": "#4F8DC4",
+  "iris_dark": "#2A5888",
+  "pupil": "#140C18",
+  "white": "#FFFFFF",
+  "suit": "#1A2850",
+  "suit_dark": "#111734",
+  "lapel": "#27396F",
+  "shirt": "#FCFCFC",
+  "shirt_shade": "#D6DDE9",
+  "tie": "#9A2236",
+  "tie_dark": "#6E1828",
+  "mouth": "#4A1624",
+  "teeth": "#FFFFFF",
+  "tongue": "#D0606A",
+  "blush": "#E8705E",
+  "sweat": "#BFE6FA",
+  "tear": "#8ACDF2",
+  "vein": "#C8283C",
+  "button": "#0E1430"
+ },
+ "anchors": {
+  "head_top": [
+   500.0,
+   133.3
+  ],
+  "chin": [
+   500.0,
+   482.0
+  ],
+  "neck": [
+   500,
+   500
+  ],
+  "eye_left": [
+   435.1,
+   314.8
+  ],
+  "eye_right": [
+   564.9,
+   314.8
+  ],
+  "brow_left": [
+   435.1,
+   274.1
+  ],
+  "brow_right": [
+   564.9,
+   274.1
+  ],
+  "mouth": [
+   500.0,
+   427.0
+  ],
+  "desk_y": 680
+ }
+}

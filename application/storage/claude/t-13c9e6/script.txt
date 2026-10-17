@@ -1,0 +1,7 @@
+JADE [angry, 0.7]: Max! The board report is gone, and Ron presents it in five minutes!
+MAX [neutral, 0.4]: I emailed it to you on Friday. Twice.
+JADE [furious, 0.8]: My inbox is empty, Max. Not one email from you!
+MAX [thinking, 0.5]: Didn't you make a filter that archives anything called "report"?
+JADE [shocked, 0.9]: That was only meant for Ron's weekly "Success Report" newsletter.
+RON [smug, 0.7]: Shame. This week's issue was called "Check Your Own Inbox First."
+MAX [happy, 0.6]: Relax, I printed a backup. I figured you'd filter me.

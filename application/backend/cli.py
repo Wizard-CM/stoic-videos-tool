@@ -163,7 +163,7 @@ def make_parser() -> argparse.ArgumentParser:
         command.add_argument("--aspect", choices=["16:9", "9:16"], default="16:9")
         command.add_argument("--quality", choices=["1080p", "720p"], default="1080p")
         command.add_argument("--no-music", action="store_true")
-        command.add_argument("--tts", choices=["piper", "fake"])
+        command.add_argument("--tts", choices=["piper", "openspeaker", "fake"])
         command.add_argument("--lipsync", choices=["rhubarb", "amplitude"])
 
     design_character_command = commands.add_parser("design-character")

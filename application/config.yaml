@@ -8,7 +8,7 @@ pipeline: [parse, cast, voice, lipsync, direct, timeline, mix, render, encode]
 
 # Plug-in providers, chosen by name.
 providers:
-  tts: piper
+  tts: openspeaker        # "piper" = free, offline, bundled voices. "openspeaker" = paid API voices (ai33.pro).
   lipsync: rhubarb        # falls back to "amplitude" when the Rhubarb binary is missing
   music: procedural
   director: claude        # "claude" = Claude Code directs every video (claude_layer/director.py). "basic" is the offline rule-based fallback.
@@ -22,6 +22,10 @@ features:
 default_voices:
   male: ryan
   female: amy
+
+# OpenSpeaker (ai33.pro) hosted voices. Put the real key in this environment variable, never in this file.
+openspeaker:
+  api_key_env: OPENSPEAKER_API_KEY
 
 render:
   fps: 24

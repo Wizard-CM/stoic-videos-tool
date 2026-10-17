@@ -1,0 +1,7 @@
+JADE [angry, 0.7]: Ron! Finance just called about the quarterly report. Want to guess why?
+RON [smug, 0.5]: Let me guess. Somebody forgot to send it, and it wasn't me.
+JADE [furious, 0.8]: You looked me in the eye and swore you'd handle it!
+RON [confused, 0.6]: And I did. I sent it Friday at five.
+JADE [shocked, 0.8]: Friday? Ron, I sent it Thursday night!
+RON [scared, 0.7]: So they got it twice. What did finance actually say?
+JADE [happy, 0.9]: They counted it twice. Record quarter! And you're presenting it to the board.

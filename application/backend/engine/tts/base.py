@@ -18,7 +18,7 @@ class TTSProvider:
 
 def get_tts_provider(name: str) -> TTSProvider:
     # Importing the provider modules fills TTS_PROVIDERS (done here to avoid circular imports).
-    from engine.tts import fake, piper  # noqa: F401
+    from engine.tts import fake, openspeaker, piper  # noqa: F401
 
     if name not in TTS_PROVIDERS:
         raise PipelineError(f"Unknown voice engine '{name}'. Use one of: {', '.join(sorted(TTS_PROVIDERS))}.")

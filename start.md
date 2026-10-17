@@ -1,0 +1,1 @@
+cd "/Users/ronakthapa/Desktop/Local Automation/new-stoic-application/application" && ./scripts/start.sh

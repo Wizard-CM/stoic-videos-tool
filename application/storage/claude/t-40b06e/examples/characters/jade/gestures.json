@@ -1,0 +1,161 @@
+{
+ "gestures": {
+  "rest": {
+   "left": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   }
+  },
+  "point": {
+   "left": {
+    "shoulder": 53.9,
+    "elbow": 108.1,
+    "hand": "point"
+   },
+   "right": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   }
+  },
+  "open_palm": {
+   "left": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": 2.1,
+    "elbow": 157.9,
+    "hand": "open"
+   }
+  },
+  "shrug": {
+   "left": {
+    "shoulder": -18.1,
+    "elbow": 176.1,
+    "hand": "palm_up"
+   },
+   "right": {
+    "shoulder": 18.1,
+    "elbow": -176.1,
+    "hand": "palm_up"
+   }
+  },
+  "fist": {
+   "left": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": 10.1,
+    "elbow": 111.9,
+    "hand": "fist"
+   }
+  },
+  "chin": {
+   "left": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": 63.1,
+    "elbow": 38.9,
+    "hand": "chin"
+   }
+  },
+  "chest": {
+   "left": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": -5.9,
+    "elbow": 69.9,
+    "hand": "flat"
+   }
+  },
+  "clasp": {
+   "left": {
+    "shoulder": -18.1,
+    "elbow": -1.9,
+    "hand": "clasp"
+   },
+   "right": {
+    "shoulder": 18.1,
+    "elbow": 1.9,
+    "hand": "rest",
+    "hide_hand": true
+   }
+  },
+  "wave": {
+   "left": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": -23.9,
+    "elbow": 163.9,
+    "hand": "open"
+   }
+  },
+  "count": {
+   "left": {
+    "shoulder": -12.1,
+    "elbow": -99.9,
+    "hand": "count"
+   },
+   "right": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   }
+  },
+  "thumbs_up": {
+   "left": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": 12.1,
+    "elbow": 57.9,
+    "hand": "thumb_up"
+   }
+  },
+  "both_palms": {
+   "left": {
+    "shoulder": -16.1,
+    "elbow": -137.9,
+    "hand": "open"
+   },
+   "right": {
+    "shoulder": 16.1,
+    "elbow": 137.9,
+    "hand": "open"
+   }
+  },
+  "point_right": {
+   "left": {
+    "shoulder": 0.0,
+    "elbow": 0.0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": -41.9,
+    "elbow": -120.1,
+    "hand": "point"
+   }
+  }
+ }
+}

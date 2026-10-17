@@ -1,0 +1,21 @@
+{
+ "gestures": {
+  "rest": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": 0, "elbow": 0, "hand": "rest"}},
+  "point": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": -20, "elbow": 150, "hand": "point"}},
+  "idea": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": -25, "elbow": 85, "hand": "point"}},
+  "point_side": {"left": {"shoulder": 65, "elbow": 103, "hand": "point"}, "right": {"shoulder": 0, "elbow": 0, "hand": "rest"}},
+  "open_palm": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": -10, "elbow": 95, "hand": "open"}},
+  "shrug": {"left": {"shoulder": -12, "elbow": -128, "hand": "palm_up"}, "right": {"shoulder": 12, "elbow": 128, "hand": "palm_up"}},
+  "fist": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": -15, "elbow": 60, "hand": "fist"}},
+  "chin": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": 85, "elbow": -14, "hand": "chin"}},
+  "chest": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": 65, "elbow": -35, "hand": "flat"}},
+  "clasp": {"left": {"shoulder": -45, "elbow": 13, "hand": "clasp"}, "right": {"shoulder": 45, "elbow": -13, "hand": "rest", "hide_hand": true}},
+  "wave": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": -30, "elbow": 133, "hand": "open"}},
+  "count": {"left": {"shoulder": 45, "elbow": -50, "hand": "count"}, "right": {"shoulder": 0, "elbow": 0, "hand": "rest"}},
+  "thumbs_up": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": -40, "elbow": 40, "hand": "thumb_up"}},
+  "both_palms": {"left": {"shoulder": 15, "elbow": -83, "hand": "open"}, "right": {"shoulder": -15, "elbow": 83, "hand": "open"}},
+  "fist_pump": {"left": {"shoulder": 70, "elbow": -160, "hand": "fist"}, "right": {"shoulder": -70, "elbow": 160, "hand": "fist"}},
+  "head_scratch": {"left": {"shoulder": 0, "elbow": 0, "hand": "rest"}, "right": {"shoulder": -109, "elbow": -171, "hand": "scratch"}},
+  "hands_up": {"left": {"shoulder": 50, "elbow": -132, "hand": "open"}, "right": {"shoulder": -50, "elbow": 132, "hand": "open"}}
+ }
+}

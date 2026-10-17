@@ -1,0 +1,7 @@
+JADE [angry, 0.7]: Max, the board report is gone. You had it last. Where is it?
+MAX [scared, 0.4]: I didn't lose it. I know exactly where it is.
+JADE [furious, 0.8]: Then why is Ron about to walk into the boardroom with nothing?
+RON [smug, 0.6]: Some of us respect deadlines, young man. Some of us don't.
+MAX [thinking, 0.5]: It's under your coffee mug, Ron. It's been there all morning.
+RON [shocked, 0.9]: That's... I thought it was a coaster. A very absorbent coaster.
+JADE [happy, 0.7]: Max, you're presenting. Ron, go find a napkin.

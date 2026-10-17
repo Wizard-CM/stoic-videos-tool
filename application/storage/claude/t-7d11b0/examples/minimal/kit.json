@@ -1,0 +1,884 @@
+{
+ "format": "toonforge-kit/1",
+ "canvas": [
+  1000,
+  1000
+ ],
+ "style": {
+  "outline": "#1A1020",
+  "outline_width": 5
+ },
+ "palette": {
+  "skin": "#C47A4E",
+  "skin_shade": "#A55E39",
+  "hair": "#1B1420",
+  "iris": "#2E8B6A",
+  "jacket": "#2B2D3A",
+  "shirt": "#2E9E7A"
+ },
+ "anchors": {
+  "head_top": [
+   500,
+   170
+  ],
+  "chin": [
+   500,
+   470
+  ],
+  "neck": [
+   500,
+   490
+  ],
+  "eye_left": [
+   440,
+   330
+  ],
+  "eye_right": [
+   560,
+   330
+  ],
+  "brow_left": [
+   440,
+   280
+  ],
+  "brow_right": [
+   560,
+   280
+  ],
+  "mouth": [
+   500,
+   420
+  ],
+  "desk_y": 880
+ },
+ "parts": {
+  "hair_back": [
+   {
+    "d": "M 325 330 A 175 200 0 1 0 675 330 A 175 200 0 1 0 325 330 Z",
+    "fill": "$hair",
+    "stroke": "outline"
+   }
+  ],
+  "body": [
+   {
+    "d": "M 300 1000 L 330 590 Q 500 540 670 590 L 700 1000 Z",
+    "fill": "$jacket",
+    "stroke": "outline"
+   },
+   {
+    "d": "M 460 560 L 500 680 L 540 560 Z",
+    "fill": "$shirt",
+    "stroke": "outline"
+   }
+  ],
+  "neck": [
+   {
+    "d": "M 465 440 H 535 V 570 H 465 Z",
+    "fill": "$skin",
+    "stroke": "outline"
+   }
+  ],
+  "head": [
+   {
+    "d": "M 350 320 A 150 150 0 1 0 650 320 A 150 150 0 1 0 350 320 Z",
+    "fill": "$skin",
+    "stroke": "outline"
+   },
+   {
+    "d": "M 398 380 A 22 12 0 1 0 442 380 A 22 12 0 1 0 398 380 Z",
+    "fill": "#E0606A",
+    "opacity": 0.35
+   }
+  ],
+  "nose": [
+   {
+    "d": "M 500 350 Q 488 384 506 386",
+    "stroke": "outline",
+    "width": 5
+   }
+  ],
+  "hair_front": [
+   {
+    "d": "M 352 300 Q 420 150 600 180 Q 560 230 352 300 Z",
+    "fill": "$hair",
+    "stroke": "outline"
+   }
+  ],
+  "accessories": []
+ },
+ "eyes": {
+  "iris": [
+   {
+    "d": "M -18 0 A 18 18 0 1 0 18 0 A 18 18 0 1 0 -18 0 Z",
+    "fill": "$iris"
+   },
+   {
+    "d": "M -8 0 A 8 8 0 1 0 8 0 A 8 8 0 1 0 -8 0 Z",
+    "fill": "#120A10"
+   },
+   {
+    "d": "M 2 -7 A 4 4 0 1 0 10 -7 A 4 4 0 1 0 2 -7 Z",
+    "fill": "#FFFFFF"
+   },
+   {
+    "d": "M -7 6 A 2 2 0 1 0 -3 6 A 2 2 0 1 0 -7 6 Z",
+    "fill": "#FFFFFF"
+   }
+  ],
+  "gaze_range": [
+   12,
+   7
+  ],
+  "states": {
+   "open": {
+    "left": {
+     "white": {
+      "d": "M 406 330 A 34 40 0 1 0 474 330 A 34 40 0 1 0 406 330 Z",
+      "fill": "#FFFFFF",
+      "stroke": "outline"
+     },
+     "over": [
+      {
+       "d": "M 404 294 Q 440 282 476 294",
+       "stroke": "outline",
+       "width": 7
+      }
+     ]
+    },
+    "right": {
+     "white": {
+      "d": "M 526 330 A 34 40 0 1 0 594 330 A 34 40 0 1 0 526 330 Z",
+      "fill": "#FFFFFF",
+      "stroke": "outline"
+     },
+     "over": [
+      {
+       "d": "M 524 294 Q 560 282 596 294",
+       "stroke": "outline",
+       "width": 7
+      }
+     ]
+    }
+   },
+   "half": {
+    "left": {
+     "white": {
+      "d": "M 406 330 A 34 40 0 1 0 474 330 A 34 40 0 1 0 406 330 Z",
+      "fill": "#FFFFFF",
+      "stroke": "outline"
+     },
+     "over": [
+      {
+       "d": "M 404 294 Q 440 282 476 294",
+       "stroke": "outline",
+       "width": 7
+      },
+      {
+       "d": "M 404 290 L 476 290 L 476 330 L 404 330 Z",
+       "fill": "$skin",
+       "stroke": "outline"
+      }
+     ]
+    },
+    "right": {
+     "white": {
+      "d": "M 526 330 A 34 40 0 1 0 594 330 A 34 40 0 1 0 526 330 Z",
+      "fill": "#FFFFFF",
+      "stroke": "outline"
+     },
+     "over": [
+      {
+       "d": "M 524 294 Q 560 282 596 294",
+       "stroke": "outline",
+       "width": 7
+      },
+      {
+       "d": "M 524 290 L 596 290 L 596 330 L 524 330 Z",
+       "fill": "$skin",
+       "stroke": "outline"
+      }
+     ]
+    }
+   },
+   "closed": {
+    "left": {
+     "white": null,
+     "over": [
+      {
+       "d": "M 406 332 Q 440 344 474 332",
+       "stroke": "outline",
+       "width": 6
+      }
+     ]
+    },
+    "right": {
+     "white": null,
+     "over": [
+      {
+       "d": "M 526 332 Q 560 344 594 332",
+       "stroke": "outline",
+       "width": 6
+      }
+     ]
+    }
+   },
+   "wide": {
+    "left": {
+     "white": {
+      "d": "M 406 330 A 34 46 0 1 0 474 330 A 34 46 0 1 0 406 330 Z",
+      "fill": "#FFFFFF",
+      "stroke": "outline"
+     },
+     "over": [
+      {
+       "d": "M 404 288 Q 440 276 476 288",
+       "stroke": "outline",
+       "width": 7
+      }
+     ]
+    },
+    "right": {
+     "white": {
+      "d": "M 526 330 A 34 46 0 1 0 594 330 A 34 46 0 1 0 526 330 Z",
+      "fill": "#FFFFFF",
+      "stroke": "outline"
+     },
+     "over": [
+      {
+       "d": "M 524 288 Q 560 276 596 288",
+       "stroke": "outline",
+       "width": 7
+      }
+     ]
+    }
+   },
+   "angry": {
+    "left": {
+     "white": {
+      "d": "M 406 330 A 34 38 0 1 0 474 330 A 34 38 0 1 0 406 330 Z",
+      "fill": "#FFFFFF",
+      "stroke": "outline"
+     },
+     "over": [
+      {
+       "d": "M 404 296 Q 440 284 476 296",
+       "stroke": "outline",
+       "width": 7
+      },
+      {
+       "d": "M 404 290 L 476 290 L 476 326 L 404 306 Z",
+       "fill": "$skin",
+       "stroke": "outline"
+      }
+     ]
+    },
+    "right": {
+     "white": {
+      "d": "M 526 330 A 34 38 0 1 0 594 330 A 34 38 0 1 0 526 330 Z",
+      "fill": "#FFFFFF",
+      "stroke": "outline"
+     },
+     "over": [
+      {
+       "d": "M 524 296 Q 560 284 596 296",
+       "stroke": "outline",
+       "width": 7
+      },
+      {
+       "d": "M 596 290 L 524 290 L 524 326 L 596 306 Z",
+       "fill": "$skin",
+       "stroke": "outline"
+      }
+     ]
+    }
+   },
+   "happy": {
+    "left": {
+     "white": null,
+     "over": [
+      {
+       "d": "M 406 332 Q 440 344 474 332",
+       "stroke": "outline",
+       "width": 6
+      }
+     ]
+    },
+    "right": {
+     "white": null,
+     "over": [
+      {
+       "d": "M 526 332 Q 560 344 594 332",
+       "stroke": "outline",
+       "width": 6
+      }
+     ]
+    }
+   }
+  }
+ },
+ "brows": {
+  "left": [
+   {
+    "d": "M 400 284 Q 440 266 480 280 L 480 290 Q 440 278 400 294 Z",
+    "fill": "$hair",
+    "stroke": "outline",
+    "width": 3
+   }
+  ],
+  "right": [
+   {
+    "d": "M 520 280 Q 560 266 600 284 L 600 294 Q 560 278 520 290 Z",
+    "fill": "$hair",
+    "stroke": "outline",
+    "width": 3
+   }
+  ],
+  "states": {}
+ },
+ "mouths": {
+  "neutral_X": [
+   {
+    "d": "M 470.0 420 Q 500 428 530.0 420",
+    "stroke": "outline",
+    "width": 6
+   }
+  ],
+  "neutral_A": [
+   {
+    "d": "M 472 420 L 528 420",
+    "stroke": "outline",
+    "width": 8
+   }
+  ],
+  "neutral_B": [
+   {
+    "d": "M 470.0 420 A 30.0 7.0 0 1 0 530.0 420 A 30.0 7.0 0 1 0 470.0 420 Z",
+    "fill": "#3A1420",
+    "stroke": "outline"
+   },
+   {
+    "d": "M 476.0 415.0 H 524.0 V 419.0 H 476.0 Z",
+    "fill": "#FFFFFF"
+   }
+  ],
+  "neutral_C": [
+   {
+    "d": "M 470.0 420 A 30.0 13.0 0 1 0 530.0 420 A 30.0 13.0 0 1 0 470.0 420 Z",
+    "fill": "#3A1420",
+    "stroke": "outline"
+   }
+  ],
+  "neutral_D": [
+   {
+    "d": "M 470.0 420 A 30.0 21.0 0 1 0 530.0 420 A 30.0 21.0 0 1 0 470.0 420 Z",
+    "fill": "#3A1420",
+    "stroke": "outline"
+   },
+   {
+    "d": "M 476.0 401.0 H 524.0 V 411.5 H 476.0 Z",
+    "fill": "#FFFFFF"
+   }
+  ],
+  "neutral_E": [
+   {
+    "d": "M 482.0 420 A 18.0 15.0 0 1 0 518.0 420 A 18.0 15.0 0 1 0 482.0 420 Z",
+    "fill": "#3A1420",
+    "stroke": "outline"
+   }
+  ],
+  "neutral_F": [
+   {
+    "d": "M 489.2 420 A 10.799999999999999 9.0 0 1 0 510.8 420 A 10.799999999999999 9.0 0 1 0 489.2 420 Z",
+    "fill": "#3A1420",
+    "stroke": "outline"
+   }
+  ],
+  "angry_C": [
+   {
+    "d": "M 465.0 420 A 35.0 13.0 0 1 0 535.0 420 A 35.0 13.0 0 1 0 465.0 420 Z",
+    "fill": "#3A1420",
+    "stroke": "outline"
+   },
+   {
+    "d": "M 471.0 409.0 H 529.0 V 415.5 H 471.0 Z",
+    "fill": "#FFFFFF"
+   }
+  ],
+  "happy_C": [
+   {
+    "d": "M 463.0 420 A 37.0 13.0 0 1 0 537.0 420 A 37.0 13.0 0 1 0 463.0 420 Z",
+    "fill": "#3A1420",
+    "stroke": "outline"
+   }
+  ],
+  "smile": [
+   {
+    "d": "M 466 414 Q 500 444 534 414",
+    "stroke": "outline",
+    "width": 6
+   }
+  ],
+  "frown": [
+   {
+    "d": "M 470 430 Q 500 410 530 430",
+    "stroke": "outline",
+    "width": 6
+   }
+  ],
+  "smirk": [
+   {
+    "d": "M 472 424 Q 505 428 532 410",
+    "stroke": "outline",
+    "width": 6
+   }
+  ],
+  "shock": [
+   {
+    "d": "M 491.0 420 A 9.0 15.0 0 1 0 509.0 420 A 9.0 15.0 0 1 0 491.0 420 Z",
+    "fill": "#3A1420",
+    "stroke": "outline"
+   }
+  ]
+ },
+ "decals": {
+  "stress_marks": [
+   {
+    "d": "M 470 220 L 474 244 M 486 216 L 488 242",
+    "stroke": "outline",
+    "width": 4
+   }
+  ]
+ },
+ "arms": {
+  "left": {
+   "shoulder": [
+    330,
+    600
+   ],
+   "elbow": [
+    300,
+    780
+   ],
+   "wrist": [
+    420,
+    870
+   ],
+   "upper": [
+    {
+     "d": "M 330 600 L 300 780",
+     "stroke": "#1A1020",
+     "width": 64
+    },
+    {
+     "d": "M 330 600 L 300 780",
+     "stroke": "$jacket",
+     "width": 54
+    }
+   ],
+   "lower": [
+    {
+     "d": "M 300 780 L 420 870",
+     "stroke": "#1A1020",
+     "width": 58
+    },
+    {
+     "d": "M 300 780 L 420 870",
+     "stroke": "$jacket",
+     "width": 48
+    }
+   ],
+   "hands": {
+    "rest": [
+     {
+      "d": "M 408 872 A 26 20 0 1 0 460 872 A 26 20 0 1 0 408 872 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     }
+    ],
+    "point": [
+     {
+      "d": "M 412 872 A 22 20 0 1 0 456 872 A 22 20 0 1 0 412 872 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     },
+     {
+      "d": "M 450 862 H 500 V 876 H 450 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     }
+    ],
+    "open": [
+     {
+      "d": "M 404 866 A 30 30 0 1 0 464 866 A 30 30 0 1 0 404 866 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     }
+    ],
+    "fist": [
+     {
+      "d": "M 412 872 A 22 22 0 1 0 456 872 A 22 22 0 1 0 412 872 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     }
+    ]
+   }
+  },
+  "right": {
+   "shoulder": [
+    670,
+    600
+   ],
+   "elbow": [
+    700,
+    780
+   ],
+   "wrist": [
+    580,
+    870
+   ],
+   "upper": [
+    {
+     "d": "M 670 600 L 700 780",
+     "stroke": "#1A1020",
+     "width": 64
+    },
+    {
+     "d": "M 670 600 L 700 780",
+     "stroke": "$jacket",
+     "width": 54
+    }
+   ],
+   "lower": [
+    {
+     "d": "M 700 780 L 580 870",
+     "stroke": "#1A1020",
+     "width": 58
+    },
+    {
+     "d": "M 700 780 L 580 870",
+     "stroke": "$jacket",
+     "width": 48
+    }
+   ],
+   "hands": {
+    "rest": [
+     {
+      "d": "M 540 872 A 26 20 0 1 0 592 872 A 26 20 0 1 0 540 872 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     }
+    ],
+    "point": [
+     {
+      "d": "M 544 872 A 22 20 0 1 0 588 872 A 22 20 0 1 0 544 872 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     },
+     {
+      "d": "M 500 862 H 550 V 876 H 500 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     }
+    ],
+    "open": [
+     {
+      "d": "M 536 866 A 30 30 0 1 0 596 866 A 30 30 0 1 0 536 866 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     }
+    ],
+    "fist": [
+     {
+      "d": "M 544 872 A 22 22 0 1 0 588 872 A 22 22 0 1 0 544 872 Z",
+      "fill": "$skin",
+      "stroke": "outline"
+     }
+    ]
+   }
+  }
+ },
+ "gestures": {
+  "rest": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest"
+   }
+  },
+  "point": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": -40,
+    "elbow": 60,
+    "hand": "point"
+   }
+  },
+  "open_palm": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": -30,
+    "elbow": 40,
+    "hand": "open"
+   }
+  },
+  "shrug": {
+   "left": {
+    "shoulder": 30,
+    "elbow": -40,
+    "hand": "open"
+   },
+   "right": {
+    "shoulder": -30,
+    "elbow": 40,
+    "hand": "open"
+   }
+  },
+  "fist": {
+   "left": {
+    "shoulder": 0,
+    "elbow": 0,
+    "hand": "rest"
+   },
+   "right": {
+    "shoulder": -20,
+    "elbow": 50,
+    "hand": "fist"
+   }
+  }
+ },
+ "expressions": {
+  "neutral": {
+   "eyes": "open",
+   "brows": {
+    "raise": 0,
+    "angle": 0
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "neutral_X",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "happy": {
+   "eyes": "open",
+   "brows": {
+    "raise": 6,
+    "angle": -4
+   },
+   "mouth_mood": "happy",
+   "rest_mouth": "smile",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "excited": {
+   "eyes": "wide",
+   "brows": {
+    "raise": 12,
+    "angle": -8
+   },
+   "mouth_mood": "happy",
+   "rest_mouth": "smile",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "sad": {
+   "eyes": "half",
+   "brows": {
+    "raise": 4,
+    "angle": -14
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "frown",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "angry": {
+   "eyes": "angry",
+   "brows": {
+    "raise": -6,
+    "angle": 16
+   },
+   "mouth_mood": "angry",
+   "rest_mouth": "frown",
+   "decals": [
+    "stress_marks"
+   ],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "furious": {
+   "eyes": "angry",
+   "brows": {
+    "raise": -10,
+    "angle": 22
+   },
+   "mouth_mood": "angry",
+   "rest_mouth": "frown",
+   "decals": [
+    "stress_marks"
+   ],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "surprised": {
+   "eyes": "wide",
+   "brows": {
+    "raise": 16,
+    "angle": -6
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "shock",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "shocked": {
+   "eyes": "wide",
+   "brows": {
+    "raise": 20,
+    "angle": -10
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "shock",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "scared": {
+   "eyes": "wide",
+   "brows": {
+    "raise": 14,
+    "angle": -16
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "frown",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "smug": {
+   "eyes": "half",
+   "brows": {
+    "raise": 2,
+    "angle": 6
+   },
+   "mouth_mood": "happy",
+   "rest_mouth": "smirk",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "confused": {
+   "eyes": "open",
+   "brows": {
+    "raise": 8,
+    "angle": 10
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "frown",
+   "decals": [],
+   "gaze": [
+    0,
+    0
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  },
+  "thinking": {
+   "eyes": "half",
+   "brows": {
+    "raise": 6,
+    "angle": 4
+   },
+   "mouth_mood": "neutral",
+   "rest_mouth": "neutral_X",
+   "decals": [],
+   "gaze": [
+    0.5,
+    -0.4
+   ],
+   "head": {
+    "tilt": 0,
+    "nod": 0
+   }
+  }
+ }
+}

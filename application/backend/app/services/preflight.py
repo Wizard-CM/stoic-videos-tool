@@ -6,7 +6,7 @@ from pathlib import Path
 from app.core.paths import project_dir
 from app.services import claude as claude_service
 from app.services.options import MAX_LENGTH_S
-from engine.config import find_tool, load_config, load_data_file, piper_voices_dir
+from engine.config import EngineConfig, find_tool, load_config, load_data_file, piper_voices_dir
 from engine.script.parser import parse_script
 
 
@@ -53,6 +53,24 @@ def _missing_voice_files(project: dict) -> list[str]:
     return sorted(set(missing))
 
 
+def _voice_provider_check(project: dict, config: EngineConfig) -> dict:
+    if config.providers["tts"] == "piper":
+        missing_voices = _missing_voice_files(project)
+        if missing_voices:
+            return _check("voices", "Voices are installed", False, f"Voice files are missing for: {', '.join(missing_voices)}.")
+        return _check("voices", "Voices are installed", True, "All voices are ready.")
+
+    if config.providers["tts"] == "openspeaker":
+        from engine.tts.openspeaker import api_key, api_key_env_name
+
+        if api_key() is None:
+            message = f"Set the {api_key_env_name()} environment variable with your OpenSpeaker API key."
+            return _check("voices", "Voice API key is set", False, message)
+        return _check("voices", "Voice API key is set", True, "The OpenSpeaker API key is set.")
+
+    return _check("voices", "Voices are installed", True, "All voices are ready.")
+
+
 def _folder_can_be_written(folder: Path) -> bool:
     existing_folder = folder
     while not existing_folder.exists() and existing_folder != existing_folder.parent:
@@ -73,11 +91,7 @@ def check_tools(project: dict) -> list[dict]:
     ffmpeg_message = "FFmpeg is ready." if ffmpeg_found else "FFmpeg was not found. Run the setup script."
     checks.append(_check("ffmpeg", "FFmpeg is installed", ffmpeg_found, ffmpeg_message))
 
-    missing_voices = _missing_voice_files(project) if config.providers["tts"] == "piper" else []
-    if missing_voices:
-        checks.append(_check("voices", "Voices are installed", False, f"Voice files are missing for: {', '.join(missing_voices)}."))
-    else:
-        checks.append(_check("voices", "Voices are installed", True, "All voices are ready."))
+    checks.append(_voice_provider_check(project, config))
 
     can_write = _folder_can_be_written(config.output_folder)
     folder_message = f"Videos are saved to {config.output_folder}." if can_write else f"Cannot write to {config.output_folder}."

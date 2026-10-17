@@ -1,0 +1,19 @@
+{
+ "idea": "Two coworkers argue about a missing report and the quiet one turns out to be right.",
+ "length": "short",
+ "target_seconds": 30,
+ "characters": [
+  {
+   "name": "Jade",
+   "description": "A sharp, no-nonsense project lead in her thirties: warm brown skin, long straight black hair parted to one side, big green eyes, teal diamond earrings, a charcoal blazer over an emerald blouse; quick to anger when someone goes behind her back."
+  },
+  {
+   "name": "Max",
+   "description": "A cheerful, energetic junior developer in his twenties: curly red hair, freckles, round glasses, a hoodie with a small laptop-sticker pattern, and a bright yellow t-shirt underneath."
+  },
+  {
+   "name": "Ron",
+   "description": "A silver-haired executive in his sixties with bushy grey brows, steel-blue eyes, a navy suit and red tie; smug, unhurried and used to getting his way."
+  }
+ ]
+}
