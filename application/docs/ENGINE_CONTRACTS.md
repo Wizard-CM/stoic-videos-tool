@@ -158,7 +158,9 @@ def normalize_direction(direction: dict, brief: dict) -> dict          # default
 def basic_direction(brief: dict) -> dict                               # rule-based offline fallback, always valid
 # providers.py
 class DirectorProvider:
-    def direct(self, brief: dict, workspace: Path, report: Callable[[float, str], None], should_cancel: Callable[[], bool]) -> dict
+    def direct(self, brief: dict, workspace: Path, report: Callable[[float, str], None], should_cancel: Callable[[], bool],
+               cast: dict | None = None, backgrounds: dict | None = None) -> dict
+    #   cast: {SPEAKER: normalized character}, backgrounds: {SPEAKER: chosen art or None}; the stage always passes both
     #   returns {"direction": {...}, "backgrounds": {SPEAKER: art}, "notes": str, "cost_usd": float | None}
 DIRECTOR_PROVIDERS: dict[str, type[DirectorProvider]]                  # "basic" built in; "claude" from claude_layer.director
 def get_director_provider(name: str) -> DirectorProvider
