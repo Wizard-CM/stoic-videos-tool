@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Response
 
-from app.schemas.projects import CastBody, ProjectChanges, ProjectCreateBody
+from app.schemas.projects import CastBackgroundBody, CastBody, ProjectChanges, ProjectCreateBody, ScriptGenerateBody
+from app.services import claude as claude_service
 from app.services import projects as project_service
 
 router = APIRouter(prefix="/api")
@@ -45,7 +46,18 @@ def get_project_thumbnail(project_id: str):
 
 @router.put("/projects/{project_id}/cast/{speaker}")
 def set_cast_member(project_id: str, speaker: str, body: CastBody):
-    return project_service.set_cast_member(project_id, speaker, body.character, body.library_id)
+    return project_service.set_cast_member(project_id, speaker, body.library_id)
+
+
+@router.put("/projects/{project_id}/cast/{speaker}/background")
+def set_cast_background(project_id: str, speaker: str, body: CastBackgroundBody):
+    return project_service.set_cast_background(project_id, speaker, body.library_id)
+
+
+@router.post("/projects/{project_id}/script/generate", status_code=202)
+def generate_script(project_id: str, body: ScriptGenerateBody):
+    project_service.get_project(project_id)
+    return claude_service.start_task("script", {"project_id": project_id, **body.model_dump()})
 
 
 @router.delete("/projects/{project_id}/cast/{speaker}")

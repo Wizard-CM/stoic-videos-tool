@@ -1,9 +1,9 @@
-"""GET /api/options: everything the UI needs to build the character builder and the settings pickers."""
+"""GET /api/options: the choice lists the UI needs (emotions, gestures, voices, settings)."""
 
-from engine.character.params import SECTIONS, builder_controls
-from engine.character.rig.controls import emotion_choices
 from engine.config import load_data_file
-from engine.scene.backgrounds import background_choices
+from engine.emotions import emotion_choices
+from engine.puppet.character import AGES, GENDERS
+from engine.puppet.kit import RECOMMENDED_GESTURES
 
 MAX_LENGTH_S = 900
 
@@ -14,6 +14,13 @@ ASPECTS = [
 QUALITIES = [
     {"value": "1080p", "label": "1080p (best)"},
     {"value": "720p", "label": "720p (faster render)"},
+]
+
+
+SCRIPT_LENGTHS = [
+    {"value": "short", "label": "Short (about 30 s)"},
+    {"value": "medium", "label": "Medium (about 90 s)"},
+    {"value": "long", "label": "Long (about 3 min)"},
 ]
 
 
@@ -31,12 +38,13 @@ def voice_options() -> list[dict]:
 
 def get_options() -> dict:
     return {
-        "controls": builder_controls(),
-        "sections": SECTIONS,
         "emotions": _choice_list(emotion_choices()),
-        "backgrounds": _choice_list(background_choices()),
+        "gestures": [{"value": name, "label": name.replace("_", " ").capitalize()} for name in ["rest", *RECOMMENDED_GESTURES]],
         "voices": voice_options(),
+        "genders": [{"value": gender, "label": gender.capitalize()} for gender in GENDERS],
+        "ages": [{"value": age, "label": age.capitalize()} for age in AGES],
         "aspects": ASPECTS,
         "qualities": QUALITIES,
+        "script_lengths": SCRIPT_LENGTHS,
         "max_length_s": MAX_LENGTH_S,
     }

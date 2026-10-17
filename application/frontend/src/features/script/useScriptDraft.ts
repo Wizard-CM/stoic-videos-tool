@@ -49,5 +49,12 @@ export function useScriptDraft(project: Project) {
     return saveDraft(draft);
   };
 
-  return { draft, updateDraft, hasUnsavedChanges, saveError, saveUnsavedChanges };
+  // Records changes that were already saved elsewhere (e.g. a script Claude wrote), without saving again.
+  const applySavedChanges = (changes: Partial<ScriptDraft>) => {
+    const nextDraft = { ...draft, ...changes };
+    setDraft(nextDraft);
+    setSavedDraft(nextDraft);
+  };
+
+  return { draft, updateDraft, applySavedChanges, hasUnsavedChanges, saveError, saveUnsavedChanges };
 }

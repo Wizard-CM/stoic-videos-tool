@@ -11,7 +11,7 @@ providers:
   tts: piper
   lipsync: rhubarb        # falls back to "amplitude" when the Rhubarb binary is missing
   music: procedural
-  director: claude        # "claude" plans shots and acting with Claude Code; "basic" is the offline rule-based fallback
+  director: basic         # "basic" = offline rule-based direction. Switch to "claude" once the Claude director is built (HANDOFF.md).
 
 # Feature switches.
 features:

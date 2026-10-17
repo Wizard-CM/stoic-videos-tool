@@ -2,11 +2,6 @@
 
 // ---------- Shared types ----------
 
-export type ParamValue = string | number | boolean;
-
-// Param keys come from GET /api/options, so the UI never hardcodes them.
-export type CharacterParams = Record<string, ParamValue>;
-
 export type Voice = {
   voice_id: string;
   auto: boolean;
@@ -14,22 +9,56 @@ export type Voice = {
   speed: number;
 };
 
-export type CharacterBackground = {
-  generator: string;
-  seed: number;
+// Who made a character or background, and what it cost.
+export type MadeBy = {
+  task_id: string;
+  cost_usd: number;
+  models: string[];
 };
 
-export type Character = {
-  id?: string | null;
+type CharacterFields = {
+  id: string;
   name: string;
   description: string;
-  params: CharacterParams;
+  gender: string | null;
+  age: string | null;
   voice: Voice;
-  background: CharacterBackground;
   seed: number;
-  created_at?: string;
-  updated_at?: string;
+  made_by: MadeBy | null;
+  created_at: string;
+  updated_at: string;
 };
+
+// The full character. The kit is Claude's drawing (docs/PUPPET_KIT.md); the UI never edits it.
+export type Character = CharacterFields & {
+  kit: unknown;
+  // Not promised by GET /api/characters/{id}; read through getPoseNames() in the studio.
+  expressions?: string[];
+  gestures?: string[];
+};
+
+// List endpoints send this instead of the full character.
+export type CharacterSummary = CharacterFields & {
+  expressions: string[];
+  gestures: string[];
+};
+
+export type CharacterChanges = Partial<Pick<CharacterFields, "name" | "description" | "gender" | "age" | "voice">>;
+
+type BackgroundFields = {
+  id: string | null;
+  name: string;
+  description: string;
+  made_by: MadeBy | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Background = BackgroundFields & { art: unknown };
+
+export type BackgroundSummary = BackgroundFields & { id: string };
+
+export type BackgroundChanges = { name?: string; description?: string };
 
 export type ProjectSettings = {
   aspect: string;
@@ -40,6 +69,9 @@ export type ProjectSettings = {
 export type CastEntry = {
   character: Character;
   library_id: string | null;
+  // null means "Claude designs it for this video"; after a storyboard or render it holds that design (id null).
+  background: Background | null;
+  background_library_id: string | null;
 };
 
 export type ProjectStatus = "draft" | "storyboarded" | "rendering" | "stopped" | "ready" | "failed";
@@ -83,18 +115,6 @@ export type ChoiceOption = {
   label: string;
 };
 
-export type Control = {
-  key: string;
-  label: string;
-  section: string;
-  type: "slider" | "select" | "color" | "toggle";
-  low?: string;
-  high?: string;
-  options?: ChoiceOption[];
-  options_by_gender?: Record<string, ChoiceOption[]>;
-  swatches?: ChoiceOption[];
-};
-
 export type VoiceOption = {
   id: string;
   label: string;
@@ -103,13 +123,14 @@ export type VoiceOption = {
 };
 
 export type Options = {
-  controls: Control[];
-  sections: string[];
   emotions: ChoiceOption[];
-  backgrounds: ChoiceOption[];
+  gestures: ChoiceOption[];
   voices: VoiceOption[];
+  genders: ChoiceOption[];
+  ages: ChoiceOption[];
   aspects: ChoiceOption[];
   qualities: ChoiceOption[];
+  script_lengths: ChoiceOption[];
   max_length_s: number;
 };
 
@@ -137,11 +158,64 @@ export type ScriptValidation = {
   estimated_length_s: number;
 };
 
-export type AutofillResult = {
-  character: Character;
-  matched: string[];
-  unmatched: string[];
+export type ScriptRequest = {
+  idea: string;
+  length: string;
+  use_library: boolean;
 };
+
+// ---------- Claude ----------
+
+export type ClaudeStatus = {
+  ready: boolean;
+  message: string;
+  cli: string | null;
+  auth: string;
+  models: { lead: string; workers: { sonnet: string; haiku: string } };
+};
+
+export type ClaudeTestResult = {
+  ok: boolean;
+  message: string;
+};
+
+export type ClaudeTaskKind = "character" | "character_revision" | "background" | "background_revision" | "script";
+
+export type ClaudeTaskState = "queued" | "running" | "done" | "failed" | "cancelled";
+
+export type ClaudeActivity = {
+  t: string;
+  // "lead" (Opus) or a worker name such as "sonnet-worker".
+  who: string;
+  kind: string;
+  text: string;
+};
+
+// Which fields are set depends on the task kind.
+export type ClaudeTaskResult = {
+  character_id?: string;
+  background_id?: string;
+  title?: string;
+  script?: string;
+};
+
+export type ClaudeTask = {
+  id: string;
+  kind: ClaudeTaskKind;
+  state: ClaudeTaskState;
+  title: string;
+  message: string;
+  activity: ClaudeActivity[];
+  result: ClaudeTaskResult | null;
+  error: string | null;
+  cost_usd: number;
+  started_at: string;
+  updated_at: string;
+};
+
+export type TaskStarted = { task_id: string };
+
+// ---------- Jobs ----------
 
 export type PreflightCheck = {
   key: string;
@@ -190,11 +264,11 @@ export type StoryboardFrame = {
 export type Storyboard = {
   length_s: number;
   shot_count: number;
-  cutaway_count: number;
-  longest_pause_s: number;
+  reaction_count: number;
   frames: StoryboardFrame[];
   preview_url: string;
   preview_length_s: number;
+  director_notes: string | null;
   aspect: string;
 };
 
@@ -250,6 +324,16 @@ function withJsonBody(method: string, body?: unknown): RequestInit {
   };
 }
 
+// "?a=1&b=x", skipping empty values.
+function buildQuery(params: Record<string, string | number | null | undefined>) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== null && value !== undefined && value !== "") query.set(key, String(value));
+  }
+  const queryText = query.toString();
+  return queryText ? `?${queryText}` : "";
+}
+
 export function getErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   return "Something went wrong.";
@@ -263,6 +347,32 @@ export function getOptions() {
 
 export function validateScript(script: string) {
   return requestJson<ScriptValidation>("/api/script/validate", withJsonBody("POST", { script }));
+}
+
+export function generateScript(projectId: string, request: ScriptRequest) {
+  return requestJson<TaskStarted>(`/api/projects/${projectId}/script/generate`, withJsonBody("POST", request));
+}
+
+// ---------- Claude ----------
+
+export function getClaudeStatus() {
+  return requestJson<ClaudeStatus>("/api/claude/status");
+}
+
+export function testClaude() {
+  return requestJson<ClaudeTestResult>("/api/claude/test", { method: "POST" });
+}
+
+export function listClaudeTasks() {
+  return requestJson<ClaudeTask[]>("/api/claude/tasks");
+}
+
+export function getClaudeTask(taskId: string) {
+  return requestJson<ClaudeTask>(`/api/claude/tasks/${taskId}`);
+}
+
+export function cancelClaudeTask(taskId: string) {
+  return requestJson<ClaudeTask>(`/api/claude/tasks/${taskId}/cancel`, { method: "POST" });
 }
 
 // ---------- Projects ----------
@@ -292,38 +402,50 @@ export function deleteProject(projectId: string) {
 }
 
 export function getProjectThumbnailUrl(projectId: string, version: string) {
-  return `/api/projects/${projectId}/thumbnail.png?v=${encodeURIComponent(version)}`;
+  return `/api/projects/${projectId}/thumbnail.png${buildQuery({ v: version })}`;
 }
 
-export function setCastMember(projectId: string, speaker: string, castEntry: CastEntry) {
-  return requestJson<Project>(
-    `/api/projects/${projectId}/cast/${encodeURIComponent(speaker)}`,
-    withJsonBody("PUT", castEntry),
-  );
+function getCastPath(projectId: string, speaker: string) {
+  return `/api/projects/${projectId}/cast/${encodeURIComponent(speaker)}`;
+}
+
+// Snapshots a library character into the project; the speaker keeps its background choice.
+export function setCastCharacter(projectId: string, speaker: string, libraryId: string) {
+  return requestJson<Project>(getCastPath(projectId, speaker), withJsonBody("PUT", { library_id: libraryId }));
 }
 
 export function removeCastMember(projectId: string, speaker: string) {
-  return requestJson<Project>(`/api/projects/${projectId}/cast/${encodeURIComponent(speaker)}`, {
-    method: "DELETE",
-  });
+  return requestJson<Project>(getCastPath(projectId, speaker), { method: "DELETE" });
+}
+
+// `null` means Claude designs a background for this video.
+export function setCastBackground(projectId: string, speaker: string, libraryId: string | null) {
+  return requestJson<Project>(
+    `${getCastPath(projectId, speaker)}/background`,
+    withJsonBody("PUT", { library_id: libraryId }),
+  );
 }
 
 // ---------- Characters ----------
 
 export function listCharacters() {
-  return requestJson<Character[]>("/api/characters");
-}
-
-export function createCharacter(character: Character) {
-  return requestJson<Character>("/api/characters", withJsonBody("POST", character));
+  return requestJson<CharacterSummary[]>("/api/characters");
 }
 
 export function getCharacter(characterId: string) {
   return requestJson<Character>(`/api/characters/${characterId}`);
 }
 
-export function updateCharacter(characterId: string, character: Character) {
-  return requestJson<Character>(`/api/characters/${characterId}`, withJsonBody("PUT", character));
+export function generateCharacter(request: { name: string; description: string; gender?: string; age?: string }) {
+  return requestJson<TaskStarted>("/api/characters/generate", withJsonBody("POST", request));
+}
+
+export function reviseCharacter(characterId: string, feedback: string) {
+  return requestJson<TaskStarted>(`/api/characters/${characterId}/revise`, withJsonBody("POST", { feedback }));
+}
+
+export function updateCharacter(characterId: string, changes: CharacterChanges) {
+  return requestJson<Character>(`/api/characters/${characterId}`, withJsonBody("PUT", changes));
 }
 
 export function deleteCharacter(characterId: string) {
@@ -338,41 +460,67 @@ export function getCharacterExportUrl(characterId: string) {
   return `/api/characters/${characterId}/export`;
 }
 
+export type CharacterPreviewParams = {
+  expression?: string;
+  gesture?: string;
+  width?: number;
+  height?: number;
+  crop?: string;
+  // Cache buster, usually the character's updated_at.
+  version?: string;
+};
+
+export function getCharacterPreviewUrl(characterId: string, params: CharacterPreviewParams) {
+  const { version, ...previewParams } = params;
+  return `/api/characters/${characterId}/preview.png${buildQuery({ ...previewParams, v: version })}`;
+}
+
+export type CharacterSheet = "expressions" | "mouths" | "gestures" | "eyes" | "hands";
+
+export function getCharacterSheetUrl(characterId: string, sheet: CharacterSheet, version: string) {
+  return `/api/characters/${characterId}/sheet.png${buildQuery({ sheet, v: version })}`;
+}
+
 export function getCharacterAvatarUrl(characterId: string, size: number, version = "") {
-  return `/api/characters/${characterId}/avatar.png?size=${size}&v=${encodeURIComponent(version)}`;
+  return `/api/characters/${characterId}/avatar.png${buildQuery({ size, v: version })}`;
 }
 
-export function newCharacter(defaults: { name?: string; gender?: string }) {
-  return requestJson<Character>("/api/characters/new", withJsonBody("POST", defaults));
+export function renderVoiceSample(voice: Voice, age?: string | null) {
+  return requestBlob("/api/voices/sample", withJsonBody("POST", { voice, age: age ?? undefined }));
 }
 
-export function autofillCharacter(description: string, character: Character) {
-  return requestJson<AutofillResult>(
-    "/api/characters/autofill",
-    withJsonBody("POST", { description, character }),
-  );
+// ---------- Backgrounds ----------
+
+export function listBackgrounds() {
+  return requestJson<BackgroundSummary[]>("/api/backgrounds");
 }
 
-export function randomizeCharacter(character: Character) {
-  return requestJson<{ character: Character }>(
-    "/api/characters/randomize",
-    withJsonBody("POST", { character }),
-  );
+export function getBackground(backgroundId: string) {
+  return requestJson<Background>(`/api/backgrounds/${backgroundId}`);
 }
 
-export function pickAutoVoice(gender: string, age: string, excludedVoiceIds: string[]) {
-  return requestJson<{ voice_id: string }>(
-    "/api/characters/auto-voice",
-    withJsonBody("POST", { gender, age, exclude: excludedVoiceIds }),
-  );
+export function generateBackground(request: { name: string; description: string; character_id?: string }) {
+  return requestJson<TaskStarted>("/api/backgrounds/generate", withJsonBody("POST", request));
 }
 
-export function renderCharacterPreview(character: Character, emotion: string) {
-  return requestBlob("/api/characters/preview", withJsonBody("POST", { character, emotion }));
+export function reviseBackground(backgroundId: string, feedback: string) {
+  return requestJson<TaskStarted>(`/api/backgrounds/${backgroundId}/revise`, withJsonBody("POST", { feedback }));
 }
 
-export function renderVoiceSample(voice: Voice) {
-  return requestBlob("/api/voices/sample", withJsonBody("POST", { voice }));
+export function updateBackground(backgroundId: string, changes: BackgroundChanges) {
+  return requestJson<Background>(`/api/backgrounds/${backgroundId}`, withJsonBody("PUT", changes));
+}
+
+export function deleteBackground(backgroundId: string) {
+  return requestJson<{ ok: boolean }>(`/api/backgrounds/${backgroundId}`, { method: "DELETE" });
+}
+
+export function getBackgroundPreviewUrl(
+  backgroundId: string,
+  params: { width?: number; characterId?: string | null; version?: string },
+) {
+  const query = buildQuery({ width: params.width, character_id: params.characterId, v: params.version });
+  return `/api/backgrounds/${backgroundId}/preview.png${query}`;
 }
 
 // ---------- Jobs, storyboard and render ----------

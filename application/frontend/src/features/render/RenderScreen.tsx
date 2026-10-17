@@ -142,7 +142,7 @@ export function RenderScreen({ projectId }: { projectId: string }) {
 
   return (
     <div className="flex max-w-[1080px] flex-col gap-6">
-      <StepHeader title={project.title} activeStep={4} />
+      <StepHeader projectId={projectId} title={project.title} activeStep="render" />
       {renderContent()}
     </div>
   );

@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
 import { ROUTES } from "../routes";
-import { CharactersIcon, LogoIcon, ProjectsIcon } from "./icons";
+import { ClaudeActivityWidget } from "./claude/ClaudeActivityWidget";
+import { LibraryIcon, LogoIcon, ProjectsIcon } from "./icons";
+
+export type SidebarSection = "projects" | "library";
 
 type SidebarProps = {
-  activeSection: "projects" | "characters";
+  activeSection: SidebarSection;
 };
 
 const ACTIVE_LINK = "bg-accent-soft font-semibold text-accent-dark hover:text-accent-dark";
@@ -46,12 +49,15 @@ export function Sidebar({ activeSection }: SidebarProps) {
         label="Projects"
       />
       <SidebarLink
-        href={ROUTES.characters}
-        isActive={activeSection === "characters"}
-        icon={<CharactersIcon />}
-        label="Characters"
+        href={ROUTES.library()}
+        isActive={activeSection === "library"}
+        icon={<LibraryIcon />}
+        label="Library"
       />
-      <p className="mx-3 mt-auto pt-6 text-[13px] text-muted">Runs fully offline on this PC.</p>
+      <div className="mt-auto flex flex-col gap-3 pt-6">
+        <ClaudeActivityWidget />
+        <p className="mx-3 my-0 text-[13px] text-muted">Claude designs and directs. Videos render on this PC.</p>
+      </div>
     </nav>
   );
 }

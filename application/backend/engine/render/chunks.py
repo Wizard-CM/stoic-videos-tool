@@ -10,7 +10,6 @@ from pathlib import Path
 from engine.config import ffmpeg_path
 from engine.errors import Cancelled, PipelineError
 from engine.render.frame import draw_frame, frame_pixels, new_frame_surface, save_jpeg
-from engine.scene.framing import shot_label
 
 CANCEL_CHECK_FRAMES = 24
 LATEST_FRAME_SECONDS = 2
@@ -21,6 +20,11 @@ ERROR_TAIL_CHARS = 600
 def format_clock(seconds: float) -> str:
     whole_seconds = int(seconds)
     return f"{whole_seconds // 60}:{whole_seconds % 60:02d}"
+
+
+def frame_caption(state: dict, t: float) -> str:
+    """Like "1:24, Ron, close-up"."""
+    return f"{format_clock(t)}, {state['shot']['label']}"
 
 
 def start_encoder(
@@ -72,6 +76,7 @@ def finish_encoder(process: subprocess.Popen, error_file) -> None:
 def render_chunks(
     timeline: dict,
     cast: dict,
+    backgrounds: dict,
     width: int,
     height: int,
     fps: int,
@@ -87,7 +92,7 @@ def render_chunks(
     chunk_dir = Path(chunk_dir)
     chunk_dir.mkdir(parents=True, exist_ok=True)
 
-    total_frames = math.ceil(timeline["length_s"] * fps)
+    total_frames = math.ceil(timeline["length_s"] * fps - 1e-6)  # the timeline length is a whole number of frames
     frames_per_chunk = chunk_seconds * fps
     chunk_total = math.ceil(total_frames / frames_per_chunk)
 
@@ -116,7 +121,7 @@ def render_chunks(
                         raise Cancelled()
                     on_chunk_progress(frame_index, total_frames, chunk_index, chunk_total, caption)
 
-                state = draw_frame(surface.getCanvas(), timeline, cast, frame_index / fps, width, height)
+                state = draw_frame(surface.getCanvas(), timeline, cast, backgrounds, frame_index / fps, width, height)
                 try:
                     process.stdin.write(frame_pixels(surface))
                 except BrokenPipeError:
@@ -124,7 +129,7 @@ def render_chunks(
 
                 if frame_index % (LATEST_FRAME_SECONDS * fps) == 0:
                     save_jpeg(surface, latest_frame_path, LATEST_FRAME_WIDTH)
-                    caption = f"{format_clock(frame_index / fps)}, {state['subject']}, {shot_label(state['shot']['size']).lower()}"
+                    caption = frame_caption(state, frame_index / fps)
 
             finish_encoder(process, error_file)
         except BaseException:

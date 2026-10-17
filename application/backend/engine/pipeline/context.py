@@ -28,8 +28,10 @@ class PipelineContext:
     project_id: str
     project_dir: Path  # storage/projects/<id>; holds cache/, work/, files/
     script: str
-    cast: dict[str, dict]  # SPEAKER -> character snapshot (already normalized)
+    cast: dict[str, dict]  # SPEAKER -> character record (normalized again by the cast stage)
     config: EngineConfig
+    title: str = ""
+    backgrounds: dict[str, dict | None] = field(default_factory=dict)  # SPEAKER -> chosen background art; None = the director designs one
     aspect: str = "16:9"
     quality: str = "1080p"
     music: bool = True

@@ -1,150 +1,73 @@
 import { useState } from "react";
-import {
-  createCharacter,
-  getErrorMessage,
-  newCharacter,
-  updateCharacter,
-  type Character,
-  type Options,
-  type Project,
-} from "../../api/client";
+import type { Options, Project } from "../../api/client";
 import { ErrorMessage, LoadingMessage } from "../../components/Messages";
-import { SaveStatus } from "../../components/SaveStatus";
 import { StepHeader } from "../../components/StepHeader";
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from "../../components/styles";
+import { useBackgroundList } from "../../hooks/useBackgroundList";
 import { useCharacterList } from "../../hooks/useCharacterList";
 import { useOptions } from "../../hooks/useOptions";
 import { useProject } from "../../hooks/useProject";
 import { useScriptValidation } from "../../hooks/useScriptValidation";
-import { capitalize } from "../../lib/format";
-import { navigateTo, ROUTES, type ProjectStep } from "../../routes";
-import { CharacterBuilder } from "../character-builder/CharacterBuilder";
-import { SpeakerChoicePanel } from "./SpeakerChoicePanel";
+import { navigateTo, ROUTES } from "../../routes";
+import { CastBackgroundSection } from "./CastBackgroundSection";
+import { CastCharacterSection } from "./CastCharacterSection";
 import { SpeakerList } from "./SpeakerList";
-import { useCastDraft } from "./useCastDraft";
 
 type CastEditorProps = {
-  project: Project;
+  initialProject: Project;
   options: Options;
   speakers: string[];
 };
 
-function CastEditor({ project, options, speakers }: CastEditorProps) {
-  const { cast, setCastEntry, saveCastEntryNow, hasUnsavedChanges, saveError, saveUnsavedChanges } =
-    useCastDraft(project);
+function CastEditor({ initialProject, options, speakers }: CastEditorProps) {
+  const [project, setProject] = useState(initialProject);
   const { characters, charactersError, reloadCharacters } = useCharacterList();
-  const [selectedSpeaker, setSelectedSpeaker] = useState<string | null>(null);
-  const [isPickingFromLibrary, setIsPickingFromLibrary] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [isContinuing, setIsContinuing] = useState(false);
-  const [continueError, setContinueError] = useState<string | null>(null);
+  const { backgrounds, backgroundsError, reloadBackgrounds } = useBackgroundList();
+  const [activeSpeaker, setActiveSpeaker] = useState(
+    () => speakers.find((speaker) => !initialProject.cast[speaker]) ?? speakers[0],
+  );
 
-  const activeSpeaker = selectedSpeaker ?? speakers[0];
-  const activeEntry = cast[activeSpeaker];
-  const isChoosingCharacter = !activeEntry || isPickingFromLibrary;
-  const hasEveryCharacter = speakers.every((speaker) => Boolean(cast[speaker]));
-  const usedVoiceIds = speakers
-    .filter((speaker) => speaker !== activeSpeaker && cast[speaker])
-    .map((speaker) => cast[speaker].character.voice.voice_id);
-
-  const handleSpeakerSelect = (speaker: string) => {
-    setSelectedSpeaker(speaker);
-    setIsPickingFromLibrary(false);
-    setCreateError(null);
-  };
-
-  const handleLibraryCharacterPick = (character: Character) => {
-    setCastEntry(activeSpeaker, { character, library_id: character.id ?? null });
-    setIsPickingFromLibrary(false);
-  };
-
-  const handleCreateNewClick = async () => {
-    setIsCreating(true);
-    setCreateError(null);
-    try {
-      const character = await newCharacter({ name: capitalize(activeSpeaker) });
-      setCastEntry(activeSpeaker, { character, library_id: null });
-      setIsPickingFromLibrary(false);
-    } catch (error) {
-      setCreateError(getErrorMessage(error));
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handleCharacterChange = (character: Character) => {
-    setCastEntry(activeSpeaker, { ...activeEntry, character });
-  };
-
-  // Updates the library copy if this speaker came from the library, otherwise adds a new one.
-  const handleSaveToLibrary = async () => {
-    let savedCharacter: Character;
-    if (activeEntry.library_id) {
-      savedCharacter = await updateCharacter(activeEntry.library_id, activeEntry.character);
-    } else {
-      savedCharacter = await createCharacter(activeEntry.character);
-    }
-    await saveCastEntryNow(activeSpeaker, { character: savedCharacter, library_id: savedCharacter.id ?? null });
-    reloadCharacters();
-    return savedCharacter;
-  };
-
-  const handleContinueClick = async (nextStep: ProjectStep) => {
-    setIsContinuing(true);
-    setContinueError(null);
-    const isSaved = await saveUnsavedChanges();
-    if (isSaved) {
-      navigateTo(ROUTES.projectStep(project.id, nextStep));
-      return;
-    }
-    setContinueError("The cast isn’t saved yet. Try again.");
-    setIsContinuing(false);
-  };
-
-  const isContinueDisabled = !hasEveryCharacter || isContinuing;
+  const hasEveryCharacter = speakers.every((speaker) => Boolean(project.cast[speaker]));
 
   return (
     <div className="flex max-w-[1120px] flex-col gap-6">
-      <StepHeader
-        title={project.title}
-        activeStep={2}
-        statusText={<SaveStatus hasUnsavedChanges={hasUnsavedChanges} saveError={saveError} />}
-      />
+      <StepHeader projectId={project.id} title={project.title} activeStep="cast" />
 
       <div className="flex flex-wrap items-start gap-5">
         <SpeakerList
+          projectId={project.id}
           speakers={speakers}
-          cast={cast}
+          cast={project.cast}
           activeSpeaker={activeSpeaker}
-          onSpeakerSelect={handleSpeakerSelect}
-          onPickFromLibraryClick={() => setIsPickingFromLibrary(true)}
+          onSpeakerSelect={setActiveSpeaker}
         />
 
-        {isChoosingCharacter && (
-          <SpeakerChoicePanel
-            speaker={activeSpeaker}
-            libraryCharacters={characters}
-            charactersError={charactersError}
-            isCreating={isCreating}
-            createError={createError}
-            canCancel={Boolean(activeEntry)}
-            onLibraryCharacterPick={handleLibraryCharacterPick}
-            onCreateNewClick={handleCreateNewClick}
-            onCancelClick={() => setIsPickingFromLibrary(false)}
-          />
-        )}
-
-        {!isChoosingCharacter && (
-          <CharacterBuilder
-            key={activeSpeaker}
-            character={activeEntry.character}
-            options={options}
-            usedVoiceIds={usedVoiceIds}
-            onCharacterChange={handleCharacterChange}
-            onSave={handleSaveToLibrary}
-          />
-        )}
+        {/* Every speaker's panel stays mounted, so Claude tasks keep going while another speaker is shown. */}
+        {speakers.map((speaker) => (
+          <div
+            key={speaker}
+            className={`${speaker === activeSpeaker ? "flex" : "hidden"} min-w-0 flex-[999_1_680px] flex-col gap-5`}
+          >
+            <CastCharacterSection
+              project={project}
+              speaker={speaker}
+              options={options}
+              characters={characters}
+              charactersError={charactersError}
+              onProjectChange={setProject}
+              onCharactersChange={reloadCharacters}
+            />
+            <CastBackgroundSection
+              project={project}
+              speaker={speaker}
+              characters={characters}
+              backgrounds={backgrounds}
+              backgroundsError={backgroundsError}
+              onProjectChange={setProject}
+              onBackgroundsChange={reloadBackgrounds}
+            />
+          </div>
+        ))}
       </div>
 
       <div className="flex flex-col items-end gap-2 border-t border-line pt-5">
@@ -152,22 +75,21 @@ function CastEditor({ project, options, speakers }: CastEditorProps) {
           <button
             type="button"
             className={`${SECONDARY_BUTTON} min-h-[46px]`}
-            disabled={isContinueDisabled}
-            onClick={() => handleContinueClick("render")}
+            disabled={!hasEveryCharacter}
+            onClick={() => navigateTo(ROUTES.projectStep(project.id, "render"))}
           >
             Skip storyboard and render
           </button>
           <button
             type="button"
             className={`${PRIMARY_BUTTON} min-h-[46px]`}
-            disabled={isContinueDisabled}
-            onClick={() => handleContinueClick("storyboard")}
+            disabled={!hasEveryCharacter}
+            onClick={() => navigateTo(ROUTES.projectStep(project.id, "storyboard"))}
           >
             Continue to storyboard
           </button>
         </div>
         {!hasEveryCharacter && <p className="m-0 text-sm text-muted">Give every speaker a character to continue.</p>}
-        <ErrorMessage message={continueError} />
       </div>
     </div>
   );
@@ -181,14 +103,14 @@ function CastSpeakersLoader({ project, options }: { project: Project; options: O
   if (validation.speakers.length === 0) {
     return (
       <div className="flex max-w-[1120px] flex-col gap-6">
-        <StepHeader title={project.title} activeStep={2} />
+        <StepHeader projectId={project.id} title={project.title} activeStep="cast" />
         <p className="m-0 text-[15px] text-muted">
           No speakers found in the script. <a href={ROUTES.projectStep(project.id, "script")}>Go back to the script</a>.
         </p>
       </div>
     );
   }
-  return <CastEditor project={project} options={options} speakers={validation.speakers} />;
+  return <CastEditor initialProject={project} options={options} speakers={validation.speakers} />;
 }
 
 export function CastScreen({ projectId }: { projectId: string }) {

@@ -1,22 +1,27 @@
 export type ProjectStep = "script" | "cast" | "storyboard" | "render";
 
+export type LibraryTab = "characters" | "backgrounds";
+
 export type Route =
   | { name: "projects" }
   | { name: "project-step"; projectId: string; step: ProjectStep }
-  | { name: "characters" }
-  | { name: "new-character" }
-  | { name: "edit-character"; characterId: string }
+  | { name: "library"; tab: LibraryTab }
+  // `characterId` / `backgroundId` are null when designing a new one.
+  | { name: "character-studio"; characterId: string | null }
+  | { name: "background-studio"; backgroundId: string | null }
   | { name: "not-found" };
 
 export const ROUTES = {
   projects: "#/",
-  characters: "#/characters",
+  library: (tab: LibraryTab = "characters") => (tab === "characters" ? "#/library" : "#/library/backgrounds"),
   newCharacter: "#/characters/new",
   editCharacter: (characterId: string) => `#/characters/${characterId}`,
+  newBackground: "#/backgrounds/new",
+  editBackground: (backgroundId: string) => `#/backgrounds/${backgroundId}`,
   projectStep: (projectId: string, step: ProjectStep) => `#/projects/${projectId}/${step}`,
 };
 
-const PROJECT_STEPS: ProjectStep[] = ["script", "cast", "storyboard", "render"];
+export const PROJECT_STEPS: ProjectStep[] = ["script", "cast", "storyboard", "render"];
 
 export function navigateTo(routeHash: string) {
   window.location.hash = routeHash;
@@ -35,10 +40,16 @@ export function parseRoute(hash: string): Route {
     return { name: "project-step", projectId: pathParts[1], step: pathParts[2] };
   }
 
-  if (pathParts[0] === "characters") {
-    if (pathParts.length === 1) return { name: "characters" };
-    if (pathParts[1] === "new") return { name: "new-character" };
-    return { name: "edit-character", characterId: pathParts[1] };
+  if (pathParts[0] === "library" && pathParts.length <= 2) {
+    return { name: "library", tab: pathParts[1] === "backgrounds" ? "backgrounds" : "characters" };
+  }
+
+  if (pathParts[0] === "characters" || pathParts[0] === "backgrounds") {
+    const isCharacter = pathParts[0] === "characters";
+    if (pathParts.length === 1) return { name: "library", tab: isCharacter ? "characters" : "backgrounds" };
+    const itemId = pathParts[1] === "new" ? null : pathParts[1];
+    if (isCharacter) return { name: "character-studio", characterId: itemId };
+    return { name: "background-studio", backgroundId: itemId };
   }
 
   return { name: "not-found" };

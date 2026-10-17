@@ -1,4 +1,4 @@
-"""The nine pipeline stages. Each one reads earlier stages from context.outputs and returns its own output."""
+"""The pipeline stages. Each one reads earlier stages from context.outputs and returns its own output."""
 
 import os
 import shutil
@@ -8,15 +8,21 @@ from pathlib import Path
 
 from engine.audio.envelope import loudness_envelope
 from engine.audio.mixer import mix_audio
-from engine.character.params import normalize_character
+from engine.direction.brief import make_brief
+from engine.direction.providers import get_director_provider
+from engine.direction.validate import DirectionError, normalize_direction
+from engine.direction.words import estimate_words
+from engine.emotions import line_emotion
 from engine.encode.ffmpeg import encode_video
 from engine.errors import PipelineError
-from engine.expression.resolver import resolve_emotions
 from engine.lipsync.base import get_lipsync_provider
 from engine.pipeline.cache import cache_path, file_hash, get_json, hash_of, put_json
 from engine.pipeline.context import PipelineContext, frame_size
 from engine.pipeline.stage import Stage
+from engine.puppet.character import normalize_character
+from engine.puppet.kit import KitError
 from engine.render.chunks import render_chunks
+from engine.scene.backgrounds import default_background, validate_background
 from engine.script.parser import parse_script
 from engine.timeline.builder import build_timeline
 from engine.tts.base import get_tts_provider, voice_settings
@@ -24,6 +30,9 @@ from engine.tts.base import get_tts_provider, voice_settings
 MAX_LENGTH_SECONDS = 900
 PAUSE_ESTIMATE_SECONDS = 0.33
 MAX_LIPSYNC_WORKERS = 4
+NOTE_LENGTH = 140
+MAX_ERRORS_SHOWN = 8
+DEFAULT_DIRECTOR = "basic"
 
 
 def format_minutes_seconds(seconds: float) -> str:
@@ -34,6 +43,15 @@ def format_minutes_seconds(seconds: float) -> str:
 def wav_duration(wav_path: Path) -> float:
     with wave.open(str(wav_path), "rb") as wav_file:
         return wav_file.getnframes() / wav_file.getframerate()
+
+
+def short_note(text: str) -> str:
+    text = " ".join(str(text).split())
+    return text if len(text) <= NOTE_LENGTH else text[: NOTE_LENGTH - 1].rstrip() + "…"
+
+
+def director_name(context: PipelineContext) -> str:
+    return context.config.providers.get("director") or DEFAULT_DIRECTOR
 
 
 class ParseStage(Stage):
@@ -55,10 +73,19 @@ class CastStage(Stage):
 
     def run(self, context: PipelineContext):
         parsed = context.outputs["parse"]
-        missing_speakers = [speaker for speaker in parsed.speakers if speaker not in context.cast]
+        missing_speakers = [speaker for speaker in parsed.speakers if not context.cast.get(speaker)]
         if missing_speakers:
             raise PipelineError(f"No character is chosen for {', '.join(missing_speakers)}. Pick a character for every speaker and try again.")
-        return {speaker: normalize_character(context.cast[speaker]) for speaker in parsed.speakers}
+
+        cast = {}
+        for speaker in parsed.speakers:
+            try:
+                cast[speaker] = normalize_character(context.cast[speaker])
+            except KitError as error:
+                problems = "; ".join(error.errors[:MAX_ERRORS_SHOWN])
+                raise PipelineError(f"The character for {speaker} cannot be drawn: {problems}") from error
+        self.done_note = f"{len(cast)} characters"
+        return cast
 
 
 class VoiceStage(Stage):
@@ -67,7 +94,6 @@ class VoiceStage(Stage):
     def run(self, context: PipelineContext):
         parsed = context.outputs["parse"]
         cast = context.outputs["cast"]
-        emotions = resolve_emotions(parsed.lines)
         tts_name = context.config.providers["tts"]
         provider = get_tts_provider(tts_name)
 
@@ -76,7 +102,8 @@ class VoiceStage(Stage):
             self.check_cancel(context)
             self.report(position / len(parsed.lines), note=f"Line {position + 1} of {len(parsed.lines)}")
 
-            settings = voice_settings(cast[line.speaker], emotions[position]["emotion"], emotions[position]["intensity"])
+            emotion, intensity = line_emotion(line)
+            settings = voice_settings(cast[line.speaker], emotion, intensity)
             wav_path = cache_path(context, "tts", f"{hash_of(line.text, settings, tts_name)}.wav")
             if not wav_path.exists():
                 temp_path = wav_path.with_name(wav_path.stem + ".tmp.wav")
@@ -87,6 +114,8 @@ class VoiceStage(Stage):
                 "index": position,
                 "speaker": line.speaker,
                 "text": line.text,
+                "emotion": emotion,
+                "intensity": intensity,
                 "wav": str(wav_path.resolve()),
                 "duration": wav_duration(wav_path),
             })
@@ -145,44 +174,109 @@ class LipSyncStage(Stage):
         return [cues_by_line[position] for position in range(len(voice_lines))]
 
 
-class EmotionStage(Stage):
-    key = "emotion"
+class DirectStage(Stage):
+    """Builds the brief, asks the director for the shots and acting (cached), and settles every speaker's background."""
+
+    key = "direct"
 
     def run(self, context: PipelineContext):
-        return resolve_emotions(context.outputs["parse"].lines)
+        parsed = context.outputs["parse"]
+        cast = context.outputs["cast"]
+        voice_lines = context.outputs["voice"]
+        fps = context.config.fps
+
+        envelopes = []
+        brief_lines = []
+        for line in voice_lines:
+            self.check_cancel(context)
+            envelope = loudness_envelope(Path(line["wav"]), fps)
+            envelopes.append(envelope)
+            brief_lines.append({
+                "index": line["index"],
+                "speaker": line["speaker"],
+                "text": line["text"],
+                "emotion": line["emotion"],
+                "intensity": line["intensity"],
+                "duration": line["duration"],
+                "words": estimate_words(line["text"], envelope, fps, line["duration"]),
+            })
+
+        chosen = {speaker: context.backgrounds.get(speaker) or None for speaker in parsed.speakers}
+        brief = make_brief(context.title, context.aspect, fps, brief_lines, cast, chosen)
+        provider_name = director_name(context)
+        direction_key = hash_of(brief, chosen, provider_name)
+        cache_file = cache_path(context, "direction", f"{direction_key}.json")
+
+        saved = get_json(cache_file)
+        cached = saved is not None
+        if not cached:
+            saved = self.ask_director(context, provider_name, brief, cast, chosen, direction_key)
+            put_json(cache_file, saved)
+
+        generated = saved["generated_backgrounds"]
+        backgrounds = {speaker: chosen[speaker] or generated.get(speaker) or default_background() for speaker in parsed.speakers}
+        self.done_note = f"{len(saved['direction']['shots'])} shots" + (", saved plan" if cached else "")
+        return {
+            "brief": brief,
+            "direction": saved["direction"],
+            "backgrounds": backgrounds,
+            "generated_backgrounds": generated,
+            "provider": provider_name,
+            "notes": saved["notes"],
+            "cost_usd": saved["cost_usd"],
+            "envelopes": envelopes,
+            "cached": cached,
+        }
+
+    def ask_director(self, context: PipelineContext, provider_name: str, brief: dict, cast: dict, chosen: dict, direction_key: str) -> dict:
+        provider = get_director_provider(provider_name)
+        workspace = context.work_dir / "director" / direction_key
+        workspace.mkdir(parents=True, exist_ok=True)
+
+        def report(fraction: float, text: str) -> None:
+            self.report(min(max(float(fraction), 0.0), 1.0), note=short_note(text))
+
+        result = provider.direct(brief, workspace, report, context.should_cancel, cast=cast, backgrounds=chosen)
+        self.check_cancel(context)
+        try:
+            direction = normalize_direction(result.get("direction"), brief)
+        except DirectionError as error:
+            problems = "; ".join(error.errors[:MAX_ERRORS_SHOWN])
+            raise PipelineError(f"The director's plan does not fit the script: {problems}") from error
+
+        notes = [str(result.get("notes") or direction["notes"]).strip()]
+        generated = {}
+        for speaker, art in (result.get("backgrounds") or {}).items():
+            if speaker not in chosen or chosen[speaker] is not None or not art:
+                continue
+            try:
+                generated[speaker] = validate_background(art)
+            except ValueError:
+                notes.append(f"The background designed for {speaker} could not be drawn, so the plain set is used.")
+        return {
+            "direction": direction,
+            "generated_backgrounds": generated,
+            "notes": " ".join(note for note in notes if note),
+            "cost_usd": result.get("cost_usd"),
+        }
 
 
 class TimelineStage(Stage):
     key = "timeline"
 
     def run(self, context: PipelineContext):
-        parsed = context.outputs["parse"]
         voice_lines = context.outputs["voice"]
         cues_by_line = context.outputs["lipsync"]
-        emotions = context.outputs["emotion"]
-        fps = context.config.fps
+        directed = context.outputs["direct"]
+        line_media = [
+            {"wav": line["wav"], "cues": cues_by_line[position], "envelope": directed["envelopes"][position]}
+            for position, line in enumerate(voice_lines)
+        ]
 
-        line_inputs = []
-        for position, voice_line in enumerate(voice_lines):
-            self.check_cancel(context)
-            self.report(position / len(voice_lines), note=f"Line {position + 1} of {len(voice_lines)}")
-            line_inputs.append({
-                "index": position,
-                "speaker": voice_line["speaker"],
-                "text": voice_line["text"],
-                "emotion": emotions[position]["emotion"],
-                "intensity": emotions[position]["intensity"],
-                "brow_raise": emotions[position]["brow_raise"],
-                "duration": voice_line["duration"],
-                "wav": voice_line["wav"],
-                "cues": cues_by_line[position],
-                "envelope": loudness_envelope(Path(voice_line["wav"]), fps),
-            })
-
-        timeline = build_timeline(line_inputs, parsed.speakers, context.aspect, fps, context.seed)
+        timeline = build_timeline(directed["brief"], directed["direction"], line_media, context.config.fps, context.seed)
         context.work_dir.mkdir(parents=True, exist_ok=True)
         put_json(context.work_dir / "timeline.json", timeline)
-        self.done_note = f"{len(timeline['shots'])} shots"
+        self.done_note = f"{len(timeline['shots'])} shots, {format_minutes_seconds(timeline['length_s'])}"
         return timeline
 
 
@@ -212,15 +306,13 @@ class RenderStage(Stage):
     def run(self, context: PipelineContext):
         timeline = context.outputs["timeline"]
         cast = context.outputs["cast"]
+        backgrounds = context.outputs["direct"]["backgrounds"]
         config = context.config
         width, height = frame_size(context.aspect, context.quality)
 
         # Only what changes the picture goes into the key, so a resumed render never reuses chunks from a different look.
-        look_of_cast = {
-            speaker: {"params": character["params"], "background": character["background"], "seed": character["seed"]}
-            for speaker, character in cast.items()
-        }
-        chunk_key = hash_of(timeline, look_of_cast, width, height, config.fps, config.x264_preset, config.x264_crf)
+        look_of_cast = {speaker: {"kit": character["kit"], "seed": character["seed"]} for speaker, character in cast.items()}
+        chunk_key = hash_of(timeline, look_of_cast, backgrounds, width, height, config.fps, config.x264_preset, config.x264_crf)
 
         chunk_dir = context.work_dir / "chunks"
         key_path = chunk_dir / "key.txt"
@@ -243,7 +335,7 @@ class RenderStage(Stage):
 
         context.files_dir.mkdir(parents=True, exist_ok=True)
         chunk_paths = render_chunks(
-            timeline, cast, width, height, config.fps, chunk_dir, config.chunk_seconds, config.x264_preset, config.x264_crf,
+            timeline, cast, backgrounds, width, height, config.fps, chunk_dir, config.chunk_seconds, config.x264_preset, config.x264_crf,
             handle_chunk_progress, context.should_cancel, context.files_dir / "latest.jpg",
         )
         self.done_note = f"{len(chunk_paths)} parts"

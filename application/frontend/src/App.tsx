@@ -1,6 +1,8 @@
-import { Sidebar } from "./components/Sidebar";
+import { ClaudeStatusBanner } from "./components/claude/ClaudeStatusBanner";
+import { Sidebar, type SidebarSection } from "./components/Sidebar";
+import { BackgroundStudioScreen } from "./features/background-studio/BackgroundStudioScreen";
 import { CastScreen } from "./features/cast/CastScreen";
-import { CharacterEditScreen } from "./features/library/CharacterEditScreen";
+import { CharacterStudioScreen } from "./features/character-studio/CharacterStudioScreen";
 import { LibraryScreen } from "./features/library/LibraryScreen";
 import { ProjectsScreen } from "./features/projects/ProjectsScreen";
 import { RenderScreen } from "./features/render/RenderScreen";
@@ -18,13 +20,15 @@ function ProjectStepScreen({ projectId, step }: { projectId: string; step: Proje
 
 function RouteScreen({ route }: { route: Route }) {
   if (route.name === "projects") return <ProjectsScreen />;
-  if (route.name === "characters") return <LibraryScreen />;
-  if (route.name === "new-character") return <CharacterEditScreen key="new" characterId={null} />;
-  if (route.name === "edit-character") {
-    return <CharacterEditScreen key={route.characterId} characterId={route.characterId} />;
+  if (route.name === "library") return <LibraryScreen tab={route.tab} />;
+  if (route.name === "character-studio") {
+    // Keyed so each character starts with fresh state.
+    return <CharacterStudioScreen key={route.characterId ?? "new"} characterId={route.characterId} />;
+  }
+  if (route.name === "background-studio") {
+    return <BackgroundStudioScreen key={route.backgroundId ?? "new"} backgroundId={route.backgroundId} />;
   }
   if (route.name === "project-step") {
-    // Keyed so each step and project starts with fresh state.
     return (
       <ProjectStepScreen key={`${route.projectId}-${route.step}`} projectId={route.projectId} step={route.step} />
     );
@@ -37,18 +41,20 @@ function RouteScreen({ route }: { route: Route }) {
   );
 }
 
-function isCharactersRoute(route: Route) {
-  return route.name === "characters" || route.name === "new-character" || route.name === "edit-character";
+function getSidebarSection(route: Route): SidebarSection {
+  const isLibraryRoute =
+    route.name === "library" || route.name === "character-studio" || route.name === "background-studio";
+  return isLibraryRoute ? "library" : "projects";
 }
 
 export function App() {
   const route = useHashRoute();
-  const activeSection = isCharactersRoute(route) ? "characters" : "projects";
 
   return (
     <div className="flex min-h-screen flex-wrap bg-page font-sans text-ink">
-      <Sidebar activeSection={activeSection} />
+      <Sidebar activeSection={getSidebarSection(route)} />
       <main className="min-w-0 flex-[999_1_560px] px-10 pt-7 pb-12">
+        <ClaudeStatusBanner />
         <RouteScreen route={route} />
       </main>
     </div>

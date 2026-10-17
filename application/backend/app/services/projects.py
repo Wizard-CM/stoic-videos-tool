@@ -3,15 +3,16 @@
 from copy import deepcopy
 from pathlib import Path
 
-from engine.render.preview import render_character_png
 from fastapi import HTTPException
 
 from app.core.timestamps import now_iso
 from app.jobs.job_files import RUNNING_STATES, is_job_alive, read_job
 from app.services.options import ASPECTS, QUALITIES
+from app.store import backgrounds as background_store
+from app.store import characters as character_store
 from app.store import projects as project_store
-from engine.character.params import normalize_character
-from engine.character.pose import neutral_pose
+from engine.puppet.character import static_pose
+from engine.puppet.preview import render_character_png
 from engine.script.parser import parse_script
 
 DEFAULT_TITLE = "Untitled project"
@@ -149,9 +150,36 @@ def delete_project(project_id: str) -> None:
 
 # ---------- cast ----------
 
-def set_cast_member(project_id: str, speaker: str, character: dict, library_id: str | None) -> dict:
+def set_cast_member(project_id: str, speaker: str, library_id: str) -> dict:
+    """Snapshots a library character into the project. The speaker's background choice is kept."""
     project = get_project(project_id)
-    project["cast"][speaker.upper()] = {"character": normalize_character(character), "library_id": library_id}
+    character = character_store.load_character(library_id)
+    if character is None:
+        raise HTTPException(status_code=404, detail="That character was not found.")
+    old_entry = project["cast"].get(speaker.upper(), {})
+    project["cast"][speaker.upper()] = {
+        "character": deepcopy(character),
+        "library_id": library_id,
+        "background": old_entry.get("background"),
+        "background_library_id": old_entry.get("background_library_id"),
+    }
+    _reset_to_draft(project)
+    return _save(project)
+
+
+def set_cast_background(project_id: str, speaker: str, library_id: str | None) -> dict:
+    """A library background for the speaker, or None: Claude designs one for this video."""
+    project = get_project(project_id)
+    entry = project["cast"].get(speaker.upper())
+    if entry is None:
+        raise HTTPException(status_code=409, detail="Pick a character for this speaker first.")
+    if library_id is None:
+        entry["background"], entry["background_library_id"] = None, None
+    else:
+        background = background_store.load_background(library_id)
+        if background is None:
+            raise HTTPException(status_code=404, detail="That background was not found.")
+        entry["background"], entry["background_library_id"] = deepcopy(background), library_id
     _reset_to_draft(project)
     return _save(project)
 
@@ -173,8 +201,8 @@ def make_thumbnail_png(project_id: str) -> bytes:
 
     speakers_in_script = parse_script(project["script"]).speakers
     first_speaker = next((speaker for speaker in speakers_in_script if speaker in cast), next(iter(cast)))
-    character = cast[first_speaker]["character"]
-    return render_character_png(character, neutral_pose(), THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT)
+    kit = cast[first_speaker]["character"]["kit"]
+    return render_character_png(kit, static_pose(kit), THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT)
 
 
 # ---------- updates made by the job worker ----------
@@ -197,6 +225,18 @@ def save_storyboard_result(project_id: str) -> None:
     project["has_storyboard"] = True
     if project["status"] == "draft":
         project["status"] = "storyboarded"
+    _save(project)
+
+
+def save_generated_backgrounds(project_id: str, generated: dict) -> None:
+    """Keeps backgrounds the director designed for this video, so the next run reuses them."""
+    project = project_store.load_project(project_id)
+    if project is None or not generated:
+        return
+    for speaker, art in generated.items():
+        entry = project["cast"].get(speaker)
+        if entry is not None and entry.get("background") is None:
+            entry["background"] = {"id": None, "name": "Designed by Claude for this video", "description": "", "art": art, "made_by": None}
     _save(project)
 
 

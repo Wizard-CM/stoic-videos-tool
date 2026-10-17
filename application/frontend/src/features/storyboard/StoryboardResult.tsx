@@ -1,4 +1,5 @@
 import type { Storyboard } from "../../api/client";
+import { WorkerBadge } from "../../components/claude/ActivityFeed";
 import { getAspectClass, PRIMARY_BUTTON, SECONDARY_BUTTON } from "../../components/styles";
 import { formatDuration } from "../../lib/format";
 import { ROUTES } from "../../routes";
@@ -40,15 +41,23 @@ export function StoryboardResult({ projectId, storyboard }: StoryboardResultProp
           <div className="grid grid-cols-2 gap-3.5">
             <SummaryStat label="Final length" value={formatDuration(storyboard.length_s)} />
             <SummaryStat label="Shots" value={String(storyboard.shot_count)} />
-            <SummaryStat label="Reaction cutaways" value={String(storyboard.cutaway_count)} />
-            <SummaryStat label="Longest pause" value={`${storyboard.longest_pause_s} s`} />
+            <SummaryStat label="Reaction shots" value={String(storyboard.reaction_count)} />
+            <SummaryStat label="Preview" value={formatDuration(storyboard.preview_length_s)} />
           </div>
+          {storyboard.director_notes && (
+            <div className="flex flex-col gap-1.5 rounded-lg bg-page p-3.5">
+              <p className="m-0 flex flex-wrap items-center gap-2 text-sm font-semibold">
+                Director’s notes <WorkerBadge who="lead" />
+              </p>
+              <p className="m-0 text-sm whitespace-pre-line text-ink-soft">{storyboard.director_notes}</p>
+            </div>
+          )}
           <div className="mt-auto flex flex-col gap-2">
             <a href={ROUTES.projectStep(projectId, "render")} className={`${PRIMARY_BUTTON} min-h-[46px]`}>
               Looks good, render video
             </a>
             <a href={ROUTES.projectStep(projectId, "script")} className={SECONDARY_BUTTON}>
-              Back to edit
+              Back to the script
             </a>
           </div>
         </aside>

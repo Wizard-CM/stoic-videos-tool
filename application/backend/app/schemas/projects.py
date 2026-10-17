@@ -18,5 +18,14 @@ class ProjectChanges(BaseModel):
 
 
 class CastBody(BaseModel):
-    character: dict
+    library_id: str
+
+
+class CastBackgroundBody(BaseModel):
     library_id: str | None = None
+
+
+class ScriptGenerateBody(BaseModel):
+    idea: str
+    length: str = "short"
+    use_library: bool = True

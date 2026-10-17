@@ -36,7 +36,7 @@ export function ProjectsScreen() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
           <h1 className="m-0 text-[30px] font-semibold tracking-[-0.01em]">Projects</h1>
-          <p className="m-0 text-[15px] text-muted">Paste a tagged script, pick your cast, and render.</p>
+          <p className="m-0 text-[15px] text-muted">Write or paste a script, cast characters Claude designs, and render.</p>
         </div>
         <div className="flex flex-col items-end gap-1.5">
           <button type="button" className={PRIMARY_BUTTON} disabled={isCreating} onClick={handleNewVideoClick}>

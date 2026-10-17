@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Options, Project } from "../../api/client";
+import { updateProject, type Options, type Project } from "../../api/client";
 import { ErrorMessage, LoadingMessage } from "../../components/Messages";
 import { SaveStatus } from "../../components/SaveStatus";
 import { StepHeader } from "../../components/StepHeader";
@@ -12,6 +12,7 @@ import { ScriptBox } from "./ScriptBox";
 import { ScriptSettingsPanel } from "./ScriptSettingsPanel";
 import { useScriptDraft } from "./useScriptDraft";
 import { ValidationSummary } from "./ValidationSummary";
+import { WriteWithClaudePanel } from "./WriteWithClaudePanel";
 
 const VALIDATE_DELAY_MS = 400;
 
@@ -21,7 +22,8 @@ type ScriptEditorProps = {
 };
 
 function ScriptEditor({ project, options }: ScriptEditorProps) {
-  const { draft, updateDraft, hasUnsavedChanges, saveError, saveUnsavedChanges } = useScriptDraft(project);
+  const { draft, updateDraft, applySavedChanges, hasUnsavedChanges, saveError, saveUnsavedChanges } =
+    useScriptDraft(project);
   const debouncedScript = useDebouncedValue(draft.script, VALIDATE_DELAY_MS);
   const { validation, validationError } = useScriptValidation(debouncedScript);
   const [isContinuing, setIsContinuing] = useState(false);
@@ -29,6 +31,11 @@ function ScriptEditor({ project, options }: ScriptEditorProps) {
 
   const estimatedLengthSeconds = validation?.estimated_length_s ?? project.estimated_length_s;
   const hasScriptErrors = validation === null || validation.error_count > 0;
+
+  const handleUseClaudeScript = async (title: string, script: string) => {
+    const savedProject = await updateProject(project.id, { title: title || draft.title, script });
+    applySavedChanges({ title: savedProject.title, script: savedProject.script });
+  };
 
   const handleContinueClick = async () => {
     setIsContinuing(true);
@@ -45,13 +52,20 @@ function ScriptEditor({ project, options }: ScriptEditorProps) {
   return (
     <div className="flex max-w-[1080px] flex-col gap-6">
       <StepHeader
+        projectId={project.id}
         title={draft.title}
-        activeStep={1}
+        activeStep="script"
         statusText={<SaveStatus hasUnsavedChanges={hasUnsavedChanges} saveError={saveError} />}
       />
 
       <div className="flex flex-wrap items-start gap-6">
         <section aria-label="Script" className="flex min-w-0 flex-[999_1_520px] flex-col gap-3">
+          <WriteWithClaudePanel
+            projectId={project.id}
+            options={options}
+            currentScript={draft.script}
+            onUseScript={handleUseClaudeScript}
+          />
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="m-0 text-[17px] font-semibold">Script</h2>
             <p className="m-0 text-[13.5px] text-muted">One line per turn: NAME [emotion]: dialogue</p>

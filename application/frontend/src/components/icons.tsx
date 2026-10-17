@@ -20,15 +20,6 @@ export function ProjectsIcon() {
   );
 }
 
-export function CharactersIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 20 C5.5 16 8.5 14 12 14 C15.5 14 18.5 16 20 20" />
-    </svg>
-  );
-}
-
 export function PlusIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
@@ -81,9 +72,15 @@ export function DoneIcon() {
   );
 }
 
-export function ActiveIcon() {
+export function ActiveIcon({ isSpinning = false, size = 20 }: { isSpinning?: boolean; size?: number }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" className="flex-none">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={`flex-none ${isSpinning ? "motion-safe:animate-spin" : ""}`}
+    >
       <circle cx="12" cy="12" r="9" fill="none" stroke="#DCE3FA" strokeWidth="3" />
       <path d="M12 3 A9 9 0 0 1 21 12" fill="none" stroke="#2D55E0" strokeWidth="3" strokeLinecap="round" />
     </svg>
@@ -103,6 +100,24 @@ export function FailedCheckIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" className="flex-none">
       <circle cx="12" cy="12" r="10" fill="#FCEBE9" />
       <path d="M8.5 8.5 L15.5 15.5 M15.5 8.5 L8.5 15.5" stroke="#A1271B" strokeWidth="2" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function SparkleIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="flex-none">
+      <path d="M12 2 C12.8 7.5 16.5 11.2 22 12 C16.5 12.8 12.8 16.5 12 22 C11.2 16.5 7.5 12.8 2 12 C7.5 11.2 11.2 7.5 12 2 Z" />
+    </svg>
+  );
+}
+
+export function LibraryIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M3 19 C4.2 15.5 6.4 14 9 14 C11.6 14 13.8 15.5 15 19" />
+      <rect x="14.5" y="4" width="7" height="6" rx="1.5" />
     </svg>
   );
 }

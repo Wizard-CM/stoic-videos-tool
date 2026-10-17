@@ -51,7 +51,7 @@ export function StoryboardScreen({ projectId }: { projectId: string }) {
         <>
           <JobProgressCard job={job}>
             <p className="m-0 text-sm text-muted">
-              Making voices, planning shots and drawing frames. The final render reuses this work.
+              Making voices, Claude directing the shots, and drawing frames. The final render reuses this work.
             </p>
           </JobProgressCard>
           <div className="flex">
@@ -89,7 +89,7 @@ export function StoryboardScreen({ projectId }: { projectId: string }) {
 
   return (
     <div className="flex max-w-[1120px] flex-col gap-6">
-      <StepHeader title={project.title} activeStep={3} />
+      <StepHeader projectId={projectId} title={project.title} activeStep="storyboard" />
       {renderContent()}
     </div>
   );

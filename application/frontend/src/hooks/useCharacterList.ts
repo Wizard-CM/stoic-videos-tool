@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { getErrorMessage, listCharacters, type Character } from "../api/client";
+import { getErrorMessage, listCharacters, type CharacterSummary } from "../api/client";
 
 export function useCharacterList() {
-  const [characters, setCharacters] = useState<Character[] | null>(null);
+  const [characters, setCharacters] = useState<CharacterSummary[] | null>(null);
   const [charactersError, setCharactersError] = useState<string | null>(null);
 
   const reloadCharacters = async () => {

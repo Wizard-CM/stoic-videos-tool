@@ -1,0 +1,57 @@
+{
+ "format": "toonforge-background/1",
+ "canvas": [
+  1920,
+  1080
+ ],
+ "palette": {
+  "wall": "#2F6B57",
+  "panel": "#285C4A",
+  "frame": "#E9D9B8"
+ },
+ "back": [
+  {
+   "d": "M 0 0 H 1920 V 1080 H 0 Z",
+   "fill": "$wall"
+  },
+  {
+   "d": "M 120 140 H 500 V 780 H 120 Z",
+   "fill": "$panel",
+   "stroke": "#1E4A3B",
+   "width": 6
+  },
+  {
+   "d": "M 1300 220 H 1720 V 580 H 1300 Z",
+   "fill": "$frame",
+   "stroke": "#B8935A",
+   "width": 12
+  },
+  {
+   "d": "M 1370 360 A 80 80 0 1 0 1530 360 A 80 80 0 1 0 1370 360 Z",
+   "fill": "#E0603A"
+  }
+ ],
+ "blur": 7,
+ "subject_x": 0.42,
+ "desk": {
+  "top": "#8A5534",
+  "front": "#5C3520",
+  "highlight": "#B47A50",
+  "thickness": 0.04
+ },
+ "foreground": [
+  {
+   "d": "M -180 1080 A 260 220 0 1 0 340 1080 A 260 220 0 1 0 -180 1080 Z",
+   "fill": "#141018"
+  }
+ ],
+ "foreground_blur": 18,
+ "glow": {
+  "color": "#FFD9A0",
+  "x": 0.86,
+  "y": 0.12,
+  "radius": 0.55,
+  "strength": 0.22
+ },
+ "vignette": 0.3
+}

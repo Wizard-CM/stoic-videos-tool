@@ -7,6 +7,7 @@ from engine.config import APP_ROOT
 
 STORAGE_DIR = Path(os.environ.get("TOONFORGE_STORAGE", APP_ROOT / "storage"))
 CHARACTERS_DIR = STORAGE_DIR / "characters"
+BACKGROUNDS_DIR = STORAGE_DIR / "backgrounds"
 PROJECTS_DIR = STORAGE_DIR / "projects"
 ACTIVE_JOB_PATH = STORAGE_DIR / "active_job.json"
 FRONTEND_DIST_DIR = APP_ROOT / "frontend" / "dist"
@@ -14,6 +15,10 @@ FRONTEND_DIST_DIR = APP_ROOT / "frontend" / "dist"
 
 def character_path(character_id: str) -> Path:
     return CHARACTERS_DIR / f"{character_id}.json"
+
+
+def background_path(background_id: str) -> Path:
+    return BACKGROUNDS_DIR / f"{background_id}.json"
 
 
 def project_dir(project_id: str) -> Path:

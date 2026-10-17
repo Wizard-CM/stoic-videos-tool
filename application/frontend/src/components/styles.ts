@@ -21,6 +21,9 @@ export const TEXT_INPUT =
 export const SELECT_INPUT =
   "min-h-[42px] rounded-lg border border-field bg-surface px-2.5 text-[15px] text-ink";
 
+export const TEXT_AREA =
+  "resize-y rounded-lg border border-field bg-surface px-3 py-2.5 text-[15px] leading-normal text-ink";
+
 export const RANGE_INPUT = "min-h-7 w-full accent-accent";
 
 export const SURFACE_CARD = "rounded-xl border border-line bg-surface";

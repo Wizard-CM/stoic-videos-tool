@@ -51,3 +51,22 @@ export function capitalize(text: string) {
   const lowerCaseText = text.toLowerCase();
   return lowerCaseText.charAt(0).toUpperCase() + lowerCaseText.slice(1);
 }
+
+// "$0.73", "<$0.01"
+export function formatCost(usd: number) {
+  if (usd > 0 && usd < 0.01) return "<$0.01";
+  return `$${usd.toFixed(2)}`;
+}
+
+// "Opus 5.5" from "claude-opus-5-5"
+export function formatModelName(modelId: string) {
+  const match = /claude-([a-z]+)-(\d+)-(\d+)/.exec(modelId);
+  if (!match) return modelId;
+  return `${capitalize(match[1])} ${match[2]}.${match[3]}`;
+}
+
+// "Stress marks" from "stress_marks"
+export function humanizeName(name: string) {
+  const spacedName = name.replace(/[_-]+/g, " ").trim();
+  return spacedName.charAt(0).toUpperCase() + spacedName.slice(1);
+}

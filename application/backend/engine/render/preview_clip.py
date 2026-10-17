@@ -15,6 +15,7 @@ PREVIEW_CRF = 24
 def render_preview_clip(
     timeline: dict,
     cast: dict,
+    backgrounds: dict,
     width: int,
     height: int,
     seconds: float,
@@ -25,7 +26,7 @@ def render_preview_clip(
     """Renders t in [0, seconds) (or the whole video if it is shorter). Returns the clip length in seconds."""
     fps = timeline["fps"]
     clip_seconds = min(seconds, timeline["length_s"])
-    frame_count = int(clip_seconds * fps)
+    frame_count = int(clip_seconds * fps + 1e-6)
 
     out_mp4 = Path(out_mp4)
     out_mp4.parent.mkdir(parents=True, exist_ok=True)
@@ -37,7 +38,7 @@ def render_preview_clip(
         for frame_index in range(frame_count):
             if frame_index % CANCEL_CHECK_FRAMES == 0 and should_cancel():
                 raise Cancelled()
-            draw_frame(surface.getCanvas(), timeline, cast, frame_index / fps, width, height)
+            draw_frame(surface.getCanvas(), timeline, cast, backgrounds, frame_index / fps, width, height)
             try:
                 process.stdin.write(frame_pixels(surface))
             except BrokenPipeError:

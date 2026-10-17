@@ -2,7 +2,7 @@
 
 from engine.errors import Cancelled
 from engine.pipeline.context import PipelineContext
-from engine.pipeline.registry import STAGE_LABELS, STAGE_WEIGHTS, STAGES
+from engine.pipeline.registry import STAGE_WEIGHTS, STAGES, stage_label
 
 
 class ProgressTracker:
@@ -25,7 +25,7 @@ class ProgressTracker:
             "stage_state": state,
             "percent": percent,
             "note": note,
-            "message": message or STAGE_LABELS[stage],
+            "message": message or stage_label(stage, self.context.config.providers),
             "chunk": chunk,
             "latest_frame_caption": caption,
         })

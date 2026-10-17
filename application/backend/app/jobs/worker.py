@@ -133,12 +133,19 @@ def _pick_output_path(project: dict) -> Path:
 def _build_context(project: dict, kind: str, on_progress, should_cancel) -> PipelineContext:
     speakers = parse_script(project["script"]).speakers
     cast = {speaker: project["cast"][speaker]["character"] for speaker in speakers}
+    # A background designed for this video earlier (id None) counts as "not chosen", so the cached direction still matches.
+    backgrounds = {}
+    for speaker in speakers:
+        background = project["cast"][speaker].get("background")
+        backgrounds[speaker] = background["art"] if background and background.get("id") else None
     settings = project["settings"]
     return PipelineContext(
         project_id=project["id"],
         project_dir=project_dir(project["id"]),
         script=project["script"],
+        title=project["title"],
         cast=cast,
+        backgrounds=backgrounds,
         config=load_config(),
         aspect=settings["aspect"],
         quality=settings["quality"],
@@ -217,6 +224,7 @@ def run_job(project_id: str, kind: str) -> None:
         context = _build_context(project, kind, on_progress, lambda: job_files.is_cancel_requested(project_id))
         result = _run_engine(kind, context)
 
+        project_service.save_generated_backgrounds(project_id, context.outputs.get("direct", {}).get("generated_backgrounds") or {})
         if kind == "render":
             project_service.save_render_result(project_id, Path(result["output_path"]), result["length_s"])
         else:

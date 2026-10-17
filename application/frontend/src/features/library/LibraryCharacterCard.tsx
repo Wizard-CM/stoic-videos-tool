@@ -4,7 +4,7 @@ import {
   getCharacterAvatarUrl,
   getCharacterExportUrl,
   getErrorMessage,
-  type Character,
+  type CharacterSummary,
 } from "../../api/client";
 import { ErrorMessage } from "../../components/Messages";
 import { SECONDARY_BUTTON } from "../../components/styles";
@@ -14,7 +14,7 @@ const AVATAR_SIZE = 192;
 const CARD_BUTTON = `${SECONDARY_BUTTON} flex-1 px-3 text-sm`;
 
 type LibraryCharacterCardProps = {
-  character: Character;
+  character: CharacterSummary;
   onCharactersChange: () => void;
 };
 
@@ -22,15 +22,13 @@ export function LibraryCharacterCard({ character, onCharactersChange }: LibraryC
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const characterId = character.id ?? "";
-
   const handleDeleteClick = async () => {
     const isConfirmed = window.confirm(`Delete “${character.name}” from the library? Projects keep their own copy.`);
     if (!isConfirmed) return;
     setIsDeleting(true);
     setDeleteError(null);
     try {
-      await deleteCharacter(characterId);
+      await deleteCharacter(character.id);
       onCharactersChange();
     } catch (error) {
       setDeleteError(getErrorMessage(error));
@@ -40,21 +38,23 @@ export function LibraryCharacterCard({ character, onCharactersChange }: LibraryC
 
   return (
     <article className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface">
-      <div className="aspect-square bg-placeholder">
+      <a href={ROUTES.editCharacter(character.id)} tabIndex={-1} aria-hidden="true" className="block aspect-square bg-placeholder">
         <img
-          src={getCharacterAvatarUrl(characterId, AVATAR_SIZE, character.updated_at)}
+          src={getCharacterAvatarUrl(character.id, AVATAR_SIZE, character.updated_at)}
           alt=""
           className="size-full object-cover"
         />
-      </div>
-      <div className="flex flex-col gap-1.5 px-4 pt-3.5 pb-4">
+      </a>
+      <div className="flex flex-1 flex-col gap-1.5 px-4 pt-3.5 pb-4">
         <h2 className="m-0 text-base font-semibold">{character.name}</h2>
-        {character.description && <p className="m-0 text-[13.5px] text-muted">{character.description}</p>}
-        <div className="mt-2 flex gap-2">
-          <a href={ROUTES.editCharacter(characterId)} className={CARD_BUTTON}>
+        {character.description && (
+          <p className="m-0 line-clamp-3 text-[13.5px] text-muted">{character.description}</p>
+        )}
+        <div className="mt-auto flex gap-2 pt-2">
+          <a href={ROUTES.editCharacter(character.id)} className={CARD_BUTTON}>
             Edit
           </a>
-          <a href={getCharacterExportUrl(characterId)} download className={CARD_BUTTON}>
+          <a href={getCharacterExportUrl(character.id)} download className={CARD_BUTTON}>
             Export
           </a>
           <button type="button" className={CARD_BUTTON} disabled={isDeleting} onClick={handleDeleteClick}>

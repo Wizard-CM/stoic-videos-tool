@@ -1,4 +1,4 @@
-"""Storyboard mode: plans the whole video, then draws a few stills and a short preview clip."""
+"""Storyboard mode: directs and plans the whole video, then draws a few stills and a short preview clip."""
 
 import json
 
@@ -7,13 +7,13 @@ from engine.pipeline.runner import ProgressTracker, check_cancel, run_stages
 from engine.render.chunks import format_clock
 from engine.render.frame import draw_frame, new_frame_surface, save_jpeg
 from engine.render.preview_clip import render_preview_clip
-from engine.scene.framing import shot_label
 
-# Stages the storyboard runs. Voice and lip sync come from the cache when the script was seen before.
-STORYBOARD_STAGE_KEYS = ["parse", "cast", "voice", "lipsync", "emotion", "timeline", "mix"]
+# Stages the storyboard runs. Voice, lip sync and the direction come from the cache when the script was seen before.
+STORYBOARD_STAGE_KEYS = ["parse", "cast", "voice", "lipsync", "direct", "timeline", "mix"]
 FRAME_SIZES = {"16:9": (854, 480), "9:16": (480, 854)}
 PREVIEW_SIZES = {"16:9": (960, 540), "9:16": (540, 960)}
 CAPTION_LENGTH = 60
+REACTION_KINDS = ("reaction", "cutaway")
 
 
 def pick_frame_times(shots: list[dict], frame_count: int) -> list[float]:
@@ -26,16 +26,14 @@ def pick_frame_times(shots: list[dict], frame_count: int) -> list[float]:
     return [(shots[position]["start"] + shots[position]["end"]) / 2 for position in shot_positions]
 
 
-def make_caption(line: dict) -> str:
+def make_caption(timeline: dict, shot: dict) -> str:
+    if shot["line_index"] is None:
+        return f"{shot['subject']} (silent beat)"
+    line = timeline["lines"][shot["line_index"]]
     text = line["text"]
     if len(text) > CAPTION_LENGTH:
         text = text[:CAPTION_LENGTH].rstrip() + "…"
     return f"{line['speaker']}: {text}"
-
-
-def longest_pause_seconds(lines: list[dict]) -> float:
-    gaps = [lines[position + 1]["start"] - lines[position]["end"] for position in range(len(lines) - 1)]
-    return round(max(gaps), 2) if gaps else 0.0
 
 
 def run_storyboard(context: PipelineContext) -> dict:
@@ -47,6 +45,8 @@ def run_storyboard(context: PipelineContext) -> dict:
 
     timeline = context.outputs["timeline"]
     cast = context.outputs["cast"]
+    directed = context.outputs["direct"]
+    backgrounds = directed["backgrounds"]
     mix_wav = context.outputs["mix"]
     storyboard_dir = context.files_dir / "storyboard"
     storyboard_dir.mkdir(parents=True, exist_ok=True)
@@ -64,21 +64,21 @@ def run_storyboard(context: PipelineContext) -> dict:
         tracker.update_stage(
             "render", number / (len(frame_times) + 1), note=f"Still {number + 1} of {len(frame_times)}", message="Drawing storyboard frames"
         )
-        state = draw_frame(surface.getCanvas(), timeline, cast, t, width, height)
+        state = draw_frame(surface.getCanvas(), timeline, cast, backgrounds, t, width, height)
         file_name = f"frame_{number:02d}.jpg"
         save_jpeg(surface, storyboard_dir / file_name)
         frames.append({
             "t": round(t, 1),
             "t_label": format_clock(t),
-            "shot_label": shot_label(state["shot"]["size"]),
-            "caption": make_caption(timeline["lines"][state["shot"]["line_index"]]),
+            "shot_label": state["shot"]["label"],
+            "caption": make_caption(timeline, state["shot"]),
             "file": f"storyboard/{file_name}",
         })
 
     tracker.update_stage("render", len(frame_times) / (len(frame_times) + 1), note="Preview clip", message="Drawing the preview clip")
     preview_width, preview_height = PREVIEW_SIZES.get(context.aspect, PREVIEW_SIZES["16:9"])
     preview_length_s = render_preview_clip(
-        timeline, cast, preview_width, preview_height, config.storyboard_preview_seconds,
+        timeline, cast, backgrounds, preview_width, preview_height, config.storyboard_preview_seconds,
         mix_wav, storyboard_dir / "preview.mp4", context.should_cancel,
     )
     tracker.finish_stage("render")
@@ -86,13 +86,13 @@ def run_storyboard(context: PipelineContext) -> dict:
         tracker.skip_stage(key)
 
     storyboard = {
-        "length_s": timeline["length_s"],
+        "length_s": round(timeline["length_s"], 2),
         "shot_count": len(timeline["shots"]),
-        "cutaway_count": sum(1 for shot in timeline["shots"] if shot["kind"] == "cutaway"),
-        "longest_pause_s": longest_pause_seconds(timeline["lines"]),
+        "reaction_count": sum(1 for shot in timeline["shots"] if shot["kind"] in REACTION_KINDS),
         "frames": frames,
         "preview_file": "storyboard/preview.mp4",
         "preview_length_s": preview_length_s,
+        "director_notes": directed["notes"],
         "aspect": context.aspect,
     }
     (storyboard_dir / "storyboard.json").write_text(json.dumps(storyboard, indent=2, ensure_ascii=False), encoding="utf-8")

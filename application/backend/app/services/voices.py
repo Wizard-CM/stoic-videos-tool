@@ -5,7 +5,6 @@ from pathlib import Path
 
 from fastapi import HTTPException
 
-from engine.character.params import normalize_character
 from engine.config import load_config, load_data_file
 from engine.errors import PipelineError
 from engine.tts.base import get_tts_provider, voice_settings
@@ -21,11 +20,11 @@ def _find_voice(voice_id: str) -> dict:
     raise HTTPException(status_code=404, detail="That voice was not found.")
 
 
-def make_voice_sample(voice: dict, text: str | None) -> bytes:
+def make_voice_sample(voice: dict, age: str | None, text: str | None) -> bytes:
     voice_info = _find_voice(voice["voice_id"])
     sample_text = text or load_data_file("voices.yaml")["sample_text"].format(name=voice_info["name"])
 
-    character = normalize_character({"voice": voice})
+    character = {"voice": voice, "age": age or "adult"}
     settings = voice_settings(character, SAMPLE_EMOTION, SAMPLE_INTENSITY)
 
     provider = get_tts_provider(load_config().providers["tts"])

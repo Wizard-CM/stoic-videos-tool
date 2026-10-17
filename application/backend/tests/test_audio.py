@@ -10,11 +10,9 @@ from helpers import FPS
 from engine.audio.envelope import loudness_envelope
 from engine.audio.mixer import mix_audio
 from engine.audio.wavio import read_wav, write_wav
-from engine.character.params import new_character
-from engine.character.rig.controls import VISEMES
 from engine.errors import Cancelled, PipelineError
 from engine.lipsync.base import get_lipsync_provider
-from engine.timeline.builder import build_timeline
+from engine.puppet.kit import LIPSYNC_SHAPES
 from engine.tts.base import get_tts_provider, voice_settings
 
 LINE_TEXTS = ["You knew about the missing report all along.", "Of course I did, and I said nothing.", "Then why did you stay silent?"]
@@ -61,8 +59,7 @@ def test_unknown_tts_provider_is_a_plain_error():
 
 
 def test_voice_settings_follow_the_character_and_emotion():
-    character = new_character("Ron")
-    character["voice"].update({"pitch": 1.0, "speed": 1.0})
+    character = {"name": "Ron", "age": "adult", "voice": {"voice_id": "ryan", "auto": True, "pitch": 1.0, "speed": 1.0}}
 
     angry = voice_settings(character, "angry", 1.0)
     sad = voice_settings(character, "sad", 1.0)
@@ -113,7 +110,7 @@ def test_lip_sync_returns_valid_shapes_that_cover_the_file(fake_wavs, provider_n
     assert cues[0][0] == 0.0
     assert cues[-1][1] == pytest.approx(duration, abs=0.05)
     for start, end, shape in cues:
-        assert shape in VISEMES
+        assert shape in LIPSYNC_SHAPES
         assert end > start
     for cue, next_cue in zip(cues, cues[1:], strict=False):
         assert cue[1] == pytest.approx(next_cue[0], abs=0.002)
@@ -129,14 +126,13 @@ def test_amplitude_lip_sync_of_silence_is_a_single_rest_shape(tmp_path):
 
 
 def make_tiny_timeline(fake_wavs) -> dict:
-    line_inputs = []
+    """Just what the mixer reads: lines back to back with 0.3 s pauses and the video length."""
+    lines, start = [], 0.3
     for number, (wav_path, duration) in enumerate(fake_wavs):
-        line_inputs.append({
-            "index": number, "speaker": "JADE" if number % 2 == 0 else "RON", "text": LINE_TEXTS[number], "emotion": "neutral",
-            "intensity": 0.6, "brow_raise": 0.0, "duration": duration, "wav": str(wav_path),
-            "cues": [[0.0, duration, "X"]], "envelope": loudness_envelope(wav_path, FPS),
-        })
-    return build_timeline(line_inputs, ["JADE", "RON"], "16:9", FPS, 1)
+        speaker = "JADE" if number % 2 == 0 else "RON"
+        lines.append({"index": number, "speaker": speaker, "text": LINE_TEXTS[number], "start": start, "end": start + duration, "wav": str(wav_path)})
+        start += duration + 0.3
+    return {"fps": FPS, "length_s": start + 0.5, "lines": lines}
 
 
 def measure_integrated_loudness(wav_path) -> float:

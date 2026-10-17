@@ -6,15 +6,19 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
-from app.api.routers import characters, files, jobs, options, projects, script
+from app.api.routers import backgrounds, characters, claude, files, jobs, options, projects, script
 from app.core.paths import FRONTEND_DIST_DIR
 from app.jobs.worker import stop_worker_on_shutdown
+from app.services import backgrounds as background_service
+from app.services import characters as character_service
 
 DEV_ORIGINS = ["http://127.0.0.1:5173", "http://localhost:5173"]
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    character_service.seed_starter_library()
+    background_service.seed_starter_library()
     yield
     stop_worker_on_shutdown()
 
@@ -23,7 +27,7 @@ app = FastAPI(title="ToonForge", lifespan=lifespan)
 
 app.add_middleware(CORSMiddleware, allow_origins=DEV_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 
-for router_module in (options, script, characters, projects, jobs, files):
+for router_module in (options, script, characters, backgrounds, claude, projects, jobs, files):
     app.include_router(router_module.router)
 
 
