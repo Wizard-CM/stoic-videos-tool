@@ -9,9 +9,9 @@ formats. It is read by the engine code (`engine/puppet/`, `engine/scene/`) and h
 The target is the reference video (`ref-video.mp4`): flat 2D vector cartoon, bust shots at a desk.
 
 - **Flat fills, one dark outline.** Every shape is a flat color with the same very dark plum outline (`#1A1020`),
-  round joins and caps, about 5 units wide on a 1000-unit canvas. No gradients on characters.
+  round joins and caps, about 3 units wide on a 1000-unit canvas. No gradients on characters.
 - **Shading is a second flat shape**, a darker tone of the base color on the side away from the light (light comes
-  from the upper right). Typical shadows: the face side under the hair, under the chin on the neck, inside the collar,
+  from the upper left). Typical shadows: the face side under the hair, under the chin on the neck, inside the collar,
   one side of each arm.
 - **Big readable faces.** Large eye whites, a large colored iris, a black pupil and two white highlight dots. Thick,
   tapered brows whose angle carries the emotion. Soft flat cheek-blush ovals (`opacity` ~0.35).
@@ -59,7 +59,7 @@ character from the top of the head down to the desk, facing the camera (a slight
 {
   "format": "toonforge-kit/1",
   "canvas": [1000, 1000],
-  "style": {"outline": "#1A1020", "outline_width": 5},
+  "style": {"outline": "#1A1020", "outline_width": 3},
   "palette": {"skin": "#C47A4E", "skin_shade": "#A55E39", "hair": "#1B1420", "...": "..."},
   "anchors": {...},
   "parts": {...},
@@ -86,7 +86,7 @@ to them so every character frames the same way.
 | `eye_left`, `eye_right` | `[x, y]` eye centers; the iris rests here | `[440, 330]`, `[560, 330]` |
 | `brow_left`, `brow_right` | `[x, y]` brow centers; brows rotate around these | `[440, 280]`, `[560, 280]` |
 | `mouth` | `[x, y]` mouth center | `[500, 420]` |
-| `desk_y` | number: the desk top line; the forearms rest on it, the engine draws the desk from here down | `880` |
+| `desk_y` | number: the desk top line; the forearms rest on it, the engine draws the desk from here down | `680` |
 
 ### `parts` (required)
 

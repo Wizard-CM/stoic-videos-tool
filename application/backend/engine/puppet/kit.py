@@ -27,7 +27,7 @@ JOINTS = ["shoulder", "elbow", "wrist"]
 RECOMMENDED_ANCHORS = {
     "head_top": [500, 170], "chin": [500, 470], "neck": [500, 490],
     "eye_left": [440, 330], "eye_right": [560, 330], "brow_left": [440, 280], "brow_right": [560, 280],
-    "mouth": [500, 420], "desk_y": 880,
+    "mouth": [500, 420], "desk_y": 680,
 }
 ANCHOR_WARNING_DISTANCE = 90  # canvas units from the recommended value before a warning
 

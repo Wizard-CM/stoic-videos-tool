@@ -408,7 +408,7 @@ def render_background_png(art: dict, width: int, height: int, kit: dict | None =
     else:
         # Where a kit drawn at the recommended anchors would put the desk.
         scale = PREVIEW_HEAD_HEIGHT * height / 300
-        desk_top_y = PREVIEW_EYE_LINE * height + scale * (880 - 330)
+        desk_top_y = PREVIEW_EYE_LINE * height + scale * (680 - 330)
 
     draw_desk(canvas, art, desk_top_y, width, height)
     foreground = render_foreground(art, width, height)

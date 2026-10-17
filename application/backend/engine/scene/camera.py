@@ -8,13 +8,13 @@ from engine.puppet.kit import head_height
 from engine.scene.backgrounds import subject_screen_x
 
 # Share of the frame height the head (head top to chin) fills.
-# 16:9 MCU shows the whole kit canvas from above the head to the desk. 9:16 frames are narrow, so the head gets a
-# smaller share of the (much taller) height: MCU then still shows both shoulders, elbows and hands across the width
-# (about 625 kit units), CU head and shoulders (about 500 units) and ECU the face (about 340 units).
-LANDSCAPE_HEAD_SHARES = {"MCU": 0.30, "CU": 0.42, "ECU": 0.66}
-PORTRAIT_HEAD_SHARES = {"MCU": 0.27, "CU": 0.36, "ECU": 0.52}
-LANDSCAPE_EYE_LINE = 0.40  # eye line as a share of the frame height, from the top
-PORTRAIT_EYE_LINE = 0.38   # a little higher in 9:16 so the desk stays in the lower band instead of the bottom edge
+# Measured from the reference: in a 16:9 MCU the head fills about 0.50 of the frame height, eye line at 0.34.
+# 9:16 frames are narrower, so the head gets a smaller share of the (much taller) height, scaled to roughly keep
+# the same amount of the kit's width in frame as before.
+LANDSCAPE_HEAD_SHARES = {"MCU": 0.50, "CU": 0.62, "ECU": 0.85}
+PORTRAIT_HEAD_SHARES = {"MCU": 0.45, "CU": 0.53, "ECU": 0.67}
+LANDSCAPE_EYE_LINE = 0.34  # eye line as a share of the frame height, from the top
+PORTRAIT_EYE_LINE = 0.32   # a little higher in 9:16 so the desk stays in the lower band instead of the bottom edge
 DRIFT_REFERENCE_HEIGHT = 1080
 
 
