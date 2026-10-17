@@ -87,11 +87,24 @@ def test_cast_and_background_choice(client):
     assert client.get(f"/api/projects/{project['id']}/thumbnail.png").content.startswith(PNG_START)
 
 
-def test_claude_is_reported_not_ready_and_generation_is_refused_plainly(client):
+def test_claude_is_ready_in_test_mode_and_generation_starts_a_task(client, no_task_process):
     status = client.get("/api/claude/status").json()
-    assert status["ready"] is False and status["message"]
+    assert status["ready"] is True and status["message"]
     assert status["models"]["lead"] == "claude-opus-5-5"
+    assert client.post("/api/claude/test").json()["ok"] is True
     assert client.get("/api/claude/tasks").json() == []
 
     response = client.post("/api/characters/generate", json={"name": "Max", "description": "a tired barista"})
-    assert response.status_code == 409 and response.json()["detail"]
+    assert response.status_code == 202
+    task_id = response.json()["task_id"]
+    assert response.json() == {"task_id": task_id} and task_id.startswith("t-")
+
+    task = client.get(f"/api/claude/tasks/{task_id}").json()
+    assert task["state"] == "queued" and task["title"] == "Designing Max" and "_pid" not in task
+    assert [listed["id"] for listed in client.get("/api/claude/tasks").json()] == [task_id]
+    assert client.post(f"/api/claude/tasks/{task_id}/cancel").json()["id"] == task_id
+    assert client.get("/api/claude/tasks/t-000000").status_code == 404
+
+    revise = client.post("/api/characters/jade-example/revise", json={"feedback": "a red scarf"})
+    assert revise.status_code == 202 and revise.json()["task_id"].startswith("t-")
+    assert client.post("/api/backgrounds/generate", json={"name": "Office", "description": "a calm office"}).status_code == 409

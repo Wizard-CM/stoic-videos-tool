@@ -4,6 +4,8 @@
                                 [--title TITLE] [--no-music] [--tts piper|fake] [--lipsync rhubarb|amplitude]
                                 [--director basic|claude] [--direction DIRECTION.json]
     python cli.py storyboard SCRIPT --cast CAST.json [same options]
+    python cli.py design-character --name NAME --description DESCRIPTION [--gender female|male|other]
+                                [--age child|young|adult|middle|elderly] [--out CHARACTER.json]
 
 CAST.json maps each speaker in the script to a character (and, optionally, a background) from the library:
     {"JADE": {"character": "data/examples/characters/jade.json", "background": "data/examples/backgrounds/office.json"},
@@ -13,16 +15,24 @@ A speaker with no "background" gets the director's own choice (or the plain defa
 --direction plays back a direction you already have instead of asking a director provider for one. It accepts
 either a bare direction object ({"format", "shots", "events", ...}) or the examples' {"about", "brief", "direction"}
 shape (only the "direction" part is used; the script's own brief is still built from SCRIPT and CAST.json).
+
+design-character asks Claude to design a new character kit and saves it straight into the character library
+(storage/characters/), the same place the app saves characters made from the UI.
 """
 
 import argparse
 import dataclasses
 import json
+import re
+import secrets
 import sys
 import time
 from pathlib import Path
 
-from app.core.paths import PROJECTS_DIR
+from app.core.paths import PROJECTS_DIR, STORAGE_DIR
+from app.services.characters import save_new_character
+from claude_layer.character import design_character
+from claude_layer.voices import AGE_CHOICES, GENDER_CHOICES
 from engine.config import load_config
 from engine.direction.providers import DIRECTOR_PROVIDERS, DirectorProvider
 from engine.errors import Cancelled, PipelineError
@@ -121,6 +131,24 @@ def build_context(args: argparse.Namespace) -> PipelineContext:
     )
 
 
+def print_activity(event: dict) -> None:
+    print(f"[{event['who']}] {event['text']}", flush=True)
+
+
+def design_character_workspace(name: str) -> Path:
+    """A scratch folder for one design-character run, separate from the app's own storage."""
+    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "character"
+    return STORAGE_DIR / "claude_cli" / f"{slug}-{secrets.token_hex(3)}"
+
+
+def run_design_character(args: argparse.Namespace) -> dict:
+    """Asks Claude to design a new character, then saves the result into the character library."""
+    inputs = {"name": args.name, "description": args.description, "gender": args.gender, "age": args.age}
+    workspace = design_character_workspace(args.name)
+    record = design_character(inputs, workspace, print_activity, lambda: False)
+    return save_new_character(record)
+
+
 def make_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="ToonForge command line")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -137,6 +165,13 @@ def make_parser() -> argparse.ArgumentParser:
         command.add_argument("--no-music", action="store_true")
         command.add_argument("--tts", choices=["piper", "fake"])
         command.add_argument("--lipsync", choices=["rhubarb", "amplitude"])
+
+    design_character_command = commands.add_parser("design-character")
+    design_character_command.add_argument("--name", required=True)
+    design_character_command.add_argument("--description", required=True)
+    design_character_command.add_argument("--gender", choices=GENDER_CHOICES)
+    design_character_command.add_argument("--age", choices=AGE_CHOICES)
+    design_character_command.add_argument("--out")
     return parser
 
 
@@ -144,6 +179,15 @@ def main() -> int:
     args = make_parser().parse_args()
     started = time.time()
     try:
+        if args.command == "design-character":
+            saved = run_design_character(args)
+            made_by = saved["made_by"]
+            cost = f"${made_by['cost_usd']:.2f}" if made_by["cost_usd"] is not None else "unknown cost"
+            print(f"Saved character {saved['id']} ({saved['name']}), {cost}, models: {', '.join(made_by['models'])}")
+            if args.out:
+                Path(args.out).write_text(json.dumps(saved, indent=2, ensure_ascii=False), encoding="utf-8")
+            return 0
+
         context = build_context(args)
         if args.command == "storyboard":
             storyboard = run_storyboard(context)

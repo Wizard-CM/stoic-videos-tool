@@ -27,4 +27,4 @@ def get_claude_task(task_id: str):
 
 @router.post("/claude/tasks/{task_id}/cancel")
 def cancel_claude_task(task_id: str):
-    return claude_service.get_task(task_id)
+    return claude_service.cancel_task(task_id)

@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 
 from app.api.routers import backgrounds, characters, claude, files, jobs, options, projects, script
 from app.core.paths import FRONTEND_DIST_DIR
+from app.jobs.claude_tasks import stop_claude_tasks_on_shutdown
 from app.jobs.worker import stop_worker_on_shutdown
 from app.services import backgrounds as background_service
 from app.services import characters as character_service
@@ -21,6 +22,7 @@ async def lifespan(app: FastAPI):
     background_service.seed_starter_library()
     yield
     stop_worker_on_shutdown()
+    stop_claude_tasks_on_shutdown()
 
 
 app = FastAPI(title="ToonForge", lifespan=lifespan)

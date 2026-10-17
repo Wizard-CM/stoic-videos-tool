@@ -130,8 +130,10 @@ except `cli.py` (task 1). Frontend: `npx tsc --noEmit` passes.
 - In-process tools return `{"content": [{"type": "text", ...}, {"type": "image", "data": b64, "mimeType": "image/png"}]}`
   — so check tools can show Claude its own renders.
 - Success only when `subtype == "success" and not is_error`; `query()` raises `ResultError` after an error result.
-- Auth: `ANTHROPIC_API_KEY` (config `claude.api_key_env`) is the recommended path — Anthropic asks products built on the
-  Agent SDK to use API keys rather than claude.ai subscription login unless approved. `claude auth status` prints JSON.
+- Auth: the user wants the local Claude Code CLI's own subscription sign-in (`claude login`/`claude auth status`) as
+  the primary path, not an API key — don't gate anything on `ANTHROPIC_API_KEY` being set. `claude auth status --json`
+  prints `{"loggedIn": bool, "authMethod": ..., "subscriptionType": ...}`; `ANTHROPIC_API_KEY` (config
+  `claude.api_key_env`) still works as a fallback.
 
 ## 6. Running things
 

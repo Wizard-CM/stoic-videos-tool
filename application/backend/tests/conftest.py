@@ -100,3 +100,43 @@ def mini_character(mini_kit) -> dict:
         "voice": {"voice_id": "amy", "auto": True, "pitch": 0.0, "speed": 0.0},
         "kit": mini_kit, "seed": 4242, "made_by": None,
     }
+
+
+class FakeTaskProcess:
+    """Stands in for a Claude task process: never starts, and counts as alive (it has this test's pid)."""
+
+    def __init__(self, target, args):
+        self.target = target
+        self.args = args
+        self.pid = os.getpid()
+
+    def start(self):
+        pass
+
+    def is_alive(self):
+        return True
+
+    def terminate(self):
+        pass
+
+
+@pytest.fixture
+def no_task_process(monkeypatch):
+    """start_task makes FakeTaskProcess objects instead of real processes. Returns them, so a test can run
+    run_claude_task(*process.args) itself, in this process."""
+    from app.jobs import claude_tasks
+    from app.jobs.processes import started_processes
+
+    made = []
+
+    def make_process(target, args):
+        process = FakeTaskProcess(target, args)
+        made.append(process)
+        return process
+
+    class FakeContext:
+        Process = staticmethod(make_process)
+
+    monkeypatch.setattr(claude_tasks.multiprocessing, "get_context", lambda method: FakeContext)
+    yield made
+    started_processes.pop(os.getpid(), None)

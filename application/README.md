@@ -52,11 +52,10 @@ application/
 The Claude Code CLI comes bundled with the `claude-agent-sdk` Python package, so there is nothing extra to install.
 ToonForge needs credentials for it:
 
-- **Recommended: an Anthropic API key.** Set the environment variable `ANTHROPIC_API_KEY` (or the variable named by
-  `claude.api_key_env` in `config.yaml`) before starting the app. Anthropic asks products built on the Agent SDK to
-  use API keys.
-- If your organization has approval to use Claude subscription sign-in for this, run `claude auth login` once with the
-  bundled CLI instead.
+- **Recommended: sign in with your Claude Pro/Max subscription.** Run `claude login` once (the bundled CLI, or a
+  system-wide `claude` install if you already use one) and ToonForge reuses that session — no API key needed.
+- **Alternative: an Anthropic API key.** Set the environment variable `ANTHROPIC_API_KEY` (or the variable named by
+  `claude.api_key_env` in `config.yaml`) before starting the app.
 
 The app shows whether Claude is ready and has a **Test connection** button.
 
@@ -68,7 +67,7 @@ Models and limits are set in `config.yaml` under `claude:`: the lead model (`cla
 1. Open PowerShell and run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`.
 2. Run `.\scripts\setup_windows.ps1`. It checks for Python 3.11, creates a virtual environment, downloads FFmpeg,
    Rhubarb and the Piper voices, installs the dependencies (including the Claude Agent SDK) and builds the frontend.
-3. Set your API key (see above), then run `.\scripts\start.bat`. The app opens at http://127.0.0.1:8000.
+3. Sign in to Claude (see above), then run `.\scripts\start.bat`. The app opens at http://127.0.0.1:8000.
 
 ## Setup — macOS / Linux (development)
 
@@ -79,7 +78,7 @@ python3 -m venv .venv
 cd ../frontend
 npm ci && npm run build
 brew install ffmpeg          # or your package manager
-export ANTHROPIC_API_KEY=...  # see "Sign in to Claude"
+claude login                 # see "Sign in to Claude"
 ../scripts/start.sh
 ```
 

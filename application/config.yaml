@@ -35,8 +35,8 @@ storyboard:
 
 # The Claude layer (Claude Code, run in the background through the Claude Agent SDK).
 # Opus leads every task: it plans, splits the work and hands simpler parts to the Sonnet and Haiku workers.
-# Sign-in: put an Anthropic API key in the environment variable named by api_key_env (recommended),
-# or sign the bundled Claude Code in once with `claude auth login`.
+# Sign-in: sign the bundled Claude Code in once with `claude login` and use your Claude Pro/Max subscription
+# (recommended), or put an Anthropic API key in the environment variable named by api_key_env instead.
 claude:
   lead_model: claude-opus-5-5
   workers:

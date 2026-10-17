@@ -60,8 +60,8 @@ NOT_INSTALLED = (
     "or set claude.cli_path in config.yaml to a claude executable."
 )
 SIGN_IN = (
-    "Claude couldn't sign in. Add your Anthropic API key: set the {env} environment variable (create a key at "
-    "console.anthropic.com) and restart ToonForge."
+    "Claude couldn't sign in. Run `claude login` to sign in with your Claude Pro/Max subscription, or set the "
+    "{env} environment variable to an Anthropic API key, then restart ToonForge."
 )
 TURN_LIMIT = "Stopped: the task hit its turn limit (claude.max_turns in config.yaml). Raise the limit or try again."
 BUDGET_LIMIT = "Stopped: the task hit its budget limit (claude.max_budget_usd in config.yaml). Raise the limit or try again."
