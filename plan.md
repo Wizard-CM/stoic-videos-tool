@@ -1,3 +1,7 @@
+> **Superseded.** This plan (puppet kits drawn once by Claude during development) was replaced by a runtime
+> Claude layer: Claude designs characters, backgrounds and scripts and directs every video inside the app.
+> See `application/docs/ENGINE_CONTRACTS.md`, `PUPPET_KIT.md` and `DIRECTION.md`.
+
 # ToonForge — replace the character system with Claude-drawn puppet kits
 
 ## Context

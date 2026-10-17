@@ -1,6 +1,28 @@
 # ToonForge — PRD / MVP
 
-Revision 1.2 (final MVP scope) · Oct 17, 2026
+Revision 2.0 (Claude layer) · Oct 17, 2026 — supersedes parts of revision 1.2 below
+
+## 0. Revision 2.0: Claude designs and directs
+
+Revision 1.2's fully coded, AI-free engine rated 1/10 in review: slider-built characters looked generic, expressions
+barely read, nothing acted, and shots were planned by fixed rules. Revision 2.0 puts **Claude in the middle**:
+
+- **Characters** are designed by Claude from the user's description, as layered vector puppet kits (face, eye/brow/mouth
+  states, arms, hands, expressions, gestures) in the reference style (`docs/PUPPET_KIT.md`). The user revises them by
+  telling Claude what to change. Sliders, keyword auto-fill and randomize are removed.
+- **Backgrounds** are designed by Claude per character/scene (library or made for one video).
+- **Scripts** can be written by Claude from a one-line idea (the tagged script box stays).
+- **Every video is directed by Claude**: shot list, rhythm (lead-ins, reaction tails, silent beats), camera pushes,
+  and each character's expressions, gestures, gaze and head moves tied to words (`docs/DIRECTION.md`).
+- **Models:** Opus 5.5 leads each task and plans; it breaks complex work into simpler subtasks and assigns them to
+  Sonnet 5.5 or Haiku 5.5 by complexity. Claude Code runs headless on each PC through the Claude Agent SDK.
+- **Tokens:** no longer zero. Cost is not optimized yet (planned later); Claude's outputs are cached so re-renders of
+  the same script reuse the direction and saved characters/backgrounds never cost again.
+- **Unchanged:** Piper voices, lip sync, audio mix, deterministic frame rendering, chunked/resumable render, MP4 encode,
+  projects, jobs, and the five-screen flow.
+
+Where sections below mention sliders, keyword auto-fill, parametric parts, rule-based emotions/shots, or an AI-free
+runtime, revision 2.0 replaces them.
 
 ## 1. Context & problem
 

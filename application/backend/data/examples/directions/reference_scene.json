@@ -1,0 +1,61 @@
+{
+  "about": "Hand-made direction that recreates the 17-second reference video (ref-video.mp4): five hard-cut shots, one line per shot, about 1.1-1.6 s of lead-in, 0.6-0.7 s of reaction tail, pushes that grow with the drama, a point on the escalation, a shrug on the dismissal, and a silent final glare.",
+  "brief": {
+    "title": "Delegation",
+    "aspect": "16:9",
+    "fps": 24,
+    "speakers": ["JADE", "RON"],
+    "lines": [
+      {"index": 0, "speaker": "JADE", "text": "You signed off on this without telling me?", "emotion": "angry", "intensity": 0.7, "duration": 2.2,
+       "words": [{"word": "You", "start": 0.0, "end": 0.16}, {"word": "signed", "start": 0.2, "end": 0.55}, {"word": "off", "start": 0.58, "end": 0.78},
+                 {"word": "on", "start": 0.8, "end": 0.92}, {"word": "this", "start": 0.95, "end": 1.2}, {"word": "without", "start": 1.24, "end": 1.62},
+                 {"word": "telling", "start": 1.66, "end": 1.98}, {"word": "me?", "start": 2.0, "end": 2.2}]},
+      {"index": 1, "speaker": "RON", "text": "It's called delegation, Jade.", "emotion": "smug", "intensity": 0.7, "duration": 1.4,
+       "words": [{"word": "It's", "start": 0.0, "end": 0.14}, {"word": "called", "start": 0.17, "end": 0.42}, {"word": "delegation,", "start": 0.45, "end": 1.08},
+                 {"word": "Jade.", "start": 1.12, "end": 1.4}]},
+      {"index": 2, "speaker": "JADE", "text": "It's called going behind my back!", "emotion": "angry", "intensity": 0.9, "duration": 1.2,
+       "words": [{"word": "It's", "start": 0.0, "end": 0.12}, {"word": "called", "start": 0.14, "end": 0.36}, {"word": "going", "start": 0.39, "end": 0.6},
+                 {"word": "behind", "start": 0.63, "end": 0.86}, {"word": "my", "start": 0.88, "end": 0.98}, {"word": "back!", "start": 1.0, "end": 1.2}]},
+      {"index": 3, "speaker": "RON", "text": "Potato, potahto.", "emotion": "smug", "intensity": 0.8, "duration": 1.6,
+       "words": [{"word": "Potato,", "start": 0.0, "end": 0.7}, {"word": "potahto.", "start": 0.85, "end": 1.6}]}
+    ],
+    "cast": {
+      "JADE": {"name": "Jade", "expressions": ["neutral", "angry", "furious", "shocked", "smug", "..."], "gestures": ["rest", "point", "fist", "..."], "has_background": true},
+      "RON": {"name": "Ron", "expressions": ["neutral", "smug", "thinking", "..."], "gestures": ["rest", "clasp", "shrug", "open_palm", "..."], "has_background": true}
+    }
+  },
+  "direction": {
+    "format": "toonforge-direction/1",
+    "shots": [
+      {"lines": [0], "subject": "JADE", "size": "MCU", "lead_in": 1.1, "tail": 0.66, "push": 0.05, "drift": 6},
+      {"lines": [1], "subject": "RON", "size": "MCU", "lead_in": 1.64, "tail": 0.63, "push": 0.035, "drift": 5},
+      {"lines": [2], "subject": "JADE", "size": "MCU", "lead_in": 1.17, "tail": 0.58, "push": 0.1, "drift": 6},
+      {"lines": [3], "subject": "RON", "size": "MCU", "lead_in": 1.42, "tail": 0.73, "push": 0.035, "drift": 5},
+      {"beat": 2.67, "subject": "JADE", "size": "MCU", "push": 0.18, "drift": 4}
+    ],
+    "events": [
+      {"who": "JADE", "line": 0, "at": -1.1, "expression": "angry", "intensity": 0.5},
+      {"who": "JADE", "line": 0, "at": "word:5", "expression": "angry", "intensity": 0.8},
+      {"who": "JADE", "line": 0, "at": "word:7", "head": "nod"},
+      {"who": "RON", "line": 1, "at": -1.6, "expression": "smug", "intensity": 0.6},
+      {"who": "RON", "line": 1, "at": -1.6, "gesture": "clasp", "until": "shot_end"},
+      {"who": "RON", "line": 1, "at": -0.6, "gaze": [-0.5, 0.0], "until": "line_end"},
+      {"who": "RON", "line": 1, "at": "word:2", "head": "tilt_left"},
+      {"who": "RON", "line": 1, "at": "word:3", "expression": "smug", "intensity": 0.85},
+      {"who": "JADE", "line": 2, "at": -1.1, "expression": "angry", "intensity": 0.8},
+      {"who": "JADE", "line": 2, "at": "word:2", "gesture": "point", "until": "shot_end"},
+      {"who": "JADE", "line": 2, "at": "word:3", "expression": "furious", "intensity": 0.95},
+      {"who": "JADE", "line": 2, "at": "word:5", "head": "nod"},
+      {"who": "RON", "line": 3, "at": -1.4, "expression": "smug", "intensity": 0.7},
+      {"who": "RON", "line": 3, "at": -1.4, "gesture": "clasp", "until": "next"},
+      {"who": "RON", "line": 3, "at": "word:1", "gesture": "shrug", "until": "shot_end"},
+      {"who": "RON", "line": 3, "at": "word:1", "head": "tilt_right"},
+      {"who": "RON", "line": 3, "at": "word:1", "expression": "smug", "intensity": 1.0},
+      {"who": "JADE", "shot": 4, "at": 0.0, "expression": "shocked", "intensity": 0.9},
+      {"who": "JADE", "shot": 4, "at": 0.0, "gesture": "point", "until": 0.9},
+      {"who": "JADE", "shot": 4, "at": 0.9, "expression": "furious", "intensity": 1.0},
+      {"who": "JADE", "shot": 4, "at": 1.0, "head": "lean_in"}
+    ],
+    "notes": "Mirrors the reference: Jade escalates (pushes 5% -> 10% -> 18%), Ron stays calm and smug (3.5%), hands clasped until the shrug on the punchline; the scene ends on Jade's silent glare."
+  }
+}
