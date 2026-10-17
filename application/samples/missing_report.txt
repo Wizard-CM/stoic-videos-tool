@@ -1,0 +1,42 @@
+# Office Drama: "The Missing Report"
+# Two colleagues, one missing quarterly report, one uncomfortable truth.
+# ~2 minutes dialogue.
+
+JADE [angry, 0.9]: Do you have any idea how many emails I sent you about that report?
+RON [neutral]: I got them.
+JADE [furious, 1.0]: And yet, here we are. The deadline was yesterday!
+RON [smug, 0.7]: You know what? I actually had it done.
+JADE [shocked, 0.8]: You what?
+RON [thinking]: Look, I finished it last week. Monday night, actually.
+JADE [confused]: Then where is it? Why didn't you send it?
+RON [sad, 0.6]: Because I knew what was in it.
+JADE: What do you mean, "what was in it"?
+RON [scared, 0.6]: The numbers don't look good. Our team's numbers. I was going to revise them.
+JADE [angry, 0.8]: Ron, you can't just rewrite financial data!
+RON: I wasn't going to rewrite anything. I was going to double-check my math.
+JADE: You had a week to double-check!
+RON [angry, 0.7]: I was scared, okay? Scared that if those numbers went up the chain, someone would get fired.
+JADE [confused]: What? Who?
+RON [sad, 0.8]: You.
+JADE [shocked, 0.9]: Me? Ron, our numbers are down because of the database migration. That's not on me!
+RON: I know that. You know that. But Peterson doesn't know that.
+JADE [angry, 0.7]: So your solution was to bury the report? That's fraud!
+RON: I know! That's why I couldn't send it.
+JADE [thinking, 0.6]: Okay. Where's the file? Right now.
+RON: Desktop. "Q3_Report_Final_v47."
+JADE: I'm sending it to Peterson with a cover memo.
+RON [scared, 0.8]: You're going to send my cover memo too? The one explaining the migration impact?
+JADE [angry, 0.6]: Actually, I'm writing a new one. One that tells the whole truth.
+RON [happy, 0.5]: You're covering for me?
+JADE [happy, 0.4]: I'm covering for both of us. That's what partners do.
+RON [happy]: Thank you, Jade.
+JADE [thinking]: Don't thank me yet. We're explaining this to Peterson together.
+RON [confused, 0.5]: Together? You mean you're not throwing me under the bus?
+JADE [thinking, 0.7]: Not today. But we need to be honest about what happened and why.
+RON [sad]: I know. I just... I panicked.
+JADE [neutral]: We all panic sometimes. But we fix it together. That's the difference between a team and a group of individuals.
+RON: I don't deserve this kindness.
+JADE [happy, 0.6]: Maybe not. But you're getting it anyway. Now let's go find Peterson before this gets worse.
+RON [neutral]: Let's do it. Thank you, Jade. I mean it.
+JADE: Come on. We've got this.
+RON [thinking]: I hope Peterson sees it the same way.

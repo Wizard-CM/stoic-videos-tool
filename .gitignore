@@ -1,0 +1,34 @@
+# OS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python (backend)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Node (frontend)
+node_modules/
+dist/
+
+# Logs
+*.log
+
+# Large downloaded tools and voice models (re-downloadable)
+application/vendor/piper_voices/
+application/vendor/rhubarb/
+
+# Generated project output (renders, audio, videos)
+application/storage/projects/
+
+

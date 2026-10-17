@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Render video</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2D55E0}a:hover{color:#1F3FB0}
+</style>
+</helmet>
+<div style="min-height: 900px; background: #F5F5F2; color: #1B1C20; font-family: 'Instrument Sans', 'Segoe UI', sans-serif; display: flex; flex-wrap: wrap">
+  <nav aria-label="Main" style="flex: 1 1 200px; max-width: 240px; box-sizing: border-box; padding: 24px 16px; border-right: 1px solid #E2E2DC; background: #FFFFFF; display: flex; flex-direction: column; gap: 4px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 10px 24px">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="2" y="3" width="24" height="18" rx="6" fill="#2D55E0"></rect><path d="M8 20 L7 26 L14 20 Z" fill="#2D55E0"></path><circle cx="10" cy="12" r="2" fill="#FFFFFF"></circle><circle cx="18" cy="12" r="2" fill="#FFFFFF"></circle></svg>
+      <span style="font-size: 18px; font-weight: 600">ToonForge</span>
+    </div>
+    <a href="Main.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; background: #E8EDFC; color: #1F3FB0; font-weight: 600; font-size: 15px; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M10 9.5 L10 14.5 L14 12 Z"></path></svg>Projects</a>
+    <a href="Cast.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: #3A3D45; font-size: 15px; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20 C5.5 16 8.5 14 12 14 C15.5 14 18.5 16 20 20"></path></svg>Characters</a>
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: #3A3D45; font-size: 15px; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6 L13 6 M19 6 L20 6 M4 12 L7 12 M13 12 L20 12 M4 18 L15 18"></path><circle cx="16" cy="6" r="2.5"></circle><circle cx="10" cy="12" r="2.5"></circle><circle cx="18" cy="18" r="2.5"></circle></svg>Settings</a>
+    <p style="margin: auto 12px 0; padding-top: 24px; font-size: 13px; color: #5E616B">Runs fully offline on this PC.</p>
+  </nav>
+
+  <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 28px 40px 48px">
+    <div style="max-width: 1080px; display: flex; flex-direction: column; gap: 24px">
+      <header style="display: flex; flex-direction: column; gap: 14px">
+        <p style="margin: 0; font-size: 14px; color: #5E616B"><a href="Main.dc.html">Projects</a> / The Missing Report</p>
+        <h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em">The Missing Report</h1>
+        <ol aria-label="Steps" style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px">
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+            <li style="display: flex; align-items: center; gap: 8px; font-size: 14.5px; color: {{s.labelColor}}; font-weight: {{s.weight}}">
+              <span style="width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; background: {{s.circleBg}}; color: {{s.circleFg}}; border: 1px solid {{s.circleBorder}}">{{s.n}}</span>{{s.label}}</li>
+          </sc-for>
+        </ol>
+      </header>
+
+      <section aria-label="Render progress" style="background: #FFFFFF; border: 1px solid #E2E2DC; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <p style="margin: 0; font-size: 15px; color: #5E616B">Drawing frames, part 9 of 14</p>
+            <p style="margin: 0; font-size: 40px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">64%</p>
+          </div>
+          <p style="margin: 0; font-size: 15px; color: #3A3D45">About 6 min left</p>
+        </div>
+        <div role="progressbar" aria-valuenow="64" aria-valuemin="0" aria-valuemax="100" aria-label="Overall progress" style="height: 10px; border-radius: 5px; background: #E6E6E0; overflow: hidden"><div style="width: 64%; height: 100%; background: #2D55E0"></div></div>
+        <p style="margin: 0; font-size: 14px; color: #5E616B">You can keep using your PC. If it sleeps or restarts, rendering picks up from part 9.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px">
+          <button type="button" style="min-height: 44px; padding: 0 18px; border: 1px solid #D4D4CD; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 15px; font-weight: 500; color: #1B1C20; cursor: pointer">Pause</button>
+          <button type="button" style="min-height: 44px; padding: 0 18px; border: 1px solid #E8C3BE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 15px; font-weight: 500; color: #A1271B; cursor: pointer">Cancel render</button>
+        </div>
+      </section>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+        <section aria-label="Stages" style="flex: 999 1 420px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E2DC; border-radius: 12px; padding: 8px 0">
+          <h2 style="margin: 0; padding: 14px 20px 8px; font-size: 16px; font-weight: 600">Stages</h2>
+          <ol style="list-style: none; margin: 0; padding: 0">
+            <sc-for list="{{stages}}" as="g" hint-placeholder-count="9">
+              <li style="display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 20px; border-top: 1px solid #EFEFEA">
+                <sc-if value="{{g.isDone}}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#E3F2E8"></circle><path d="M7.5 12.5 L10.5 15.5 L16.5 9" stroke="#1D6A40" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+                <sc-if value="{{g.isActive}}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#DCE3FA" stroke-width="3"></circle><path d="M12 3 A9 9 0 0 1 21 12" fill="none" stroke="#2D55E0" stroke-width="3" stroke-linecap="round"></path></svg></sc-if>
+                <sc-if value="{{g.isWaiting}}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#C9C9C1" stroke-width="2"></circle></svg></sc-if>
+                <span style="flex: 1; font-size: 15px; font-weight: {{g.weight}}; color: {{g.color}}">{{g.name}}</span>
+                <span style="font-size: 13.5px; color: #5E616B; font-variant-numeric: tabular-nums">{{g.note}}</span>
+              </li>
+            </sc-for>
+          </ol>
+        </section>
+
+        <aside aria-label="Current frame" style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600">Latest frame</h2>
+          <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 16 / 9; background: #27304F">
+            <svg viewBox="40 12 80 45" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Latest rendered frame: Ron, close-up"><rect width="160" height="90" fill="#27304F"></rect><rect x="122" y="24" width="16" height="66" fill="#1A2139"></rect><path d="M48 90 C48 73 63 65 80 65 C97 65 112 73 112 90 Z" fill="#22325E"></path><path d="M72 66 L80 80 L88 66 Z" fill="#FFFFFF"></path><path d="M78.5 70 L81.5 70 L82.5 86 L80 89 L77.5 86 Z" fill="#A3262A"></path><rect x="74" y="55" width="12" height="12" fill="#D19C78"></rect><ellipse cx="64" cy="43" rx="2.5" ry="4" fill="#D19C78"></ellipse><ellipse cx="96" cy="43" rx="2.5" ry="4" fill="#D19C78"></ellipse><ellipse cx="80" cy="40" rx="16" ry="20" fill="#E2B08C"></ellipse><path d="M63 40 C60 22 70 12 81 12 C93 12 101 21 97 40 C96 30 92 24 86 23 C80 26 70 25 66 30 C64 33 64 37 63 40 Z" fill="#D9DCE1"></path><path d="M67 33 Q73 30 77 33" stroke="#8C9099" stroke-width="2.6" fill="none" stroke-linecap="round"></path><path d="M83 33 Q88 30 93 33" stroke="#8C9099" stroke-width="2.6" fill="none" stroke-linecap="round"></path><ellipse cx="72.5" cy="40" rx="3.6" ry="3.2" fill="#FFFFFF"></ellipse><ellipse cx="87.5" cy="40" rx="3.6" ry="3.2" fill="#FFFFFF"></ellipse><circle cx="73" cy="40.4" r="1.7" fill="#3E6FA8"></circle><circle cx="88" cy="40.4" r="1.7" fill="#3E6FA8"></circle><path d="M80 41 L78 48 L81 48" stroke="#B9835F" stroke-width="1.2" fill="none" stroke-linecap="round"></path><ellipse cx="80" cy="53.5" rx="3.6" ry="2.2" fill="#6E3B2C"></ellipse></svg>
+          </div>
+          <p style="margin: 0; font-size: 13.5px; color: #5E616B">1:24, RON, close-up. Saved to Videos\ToonForge when done.</p>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const done = { circleBg: '#E3F2E8', circleFg: '#1D6A40', circleBorder: '#B9DEC6', labelColor: '#3A3D45', weight: 400 };
+    const active = { circleBg: '#2D55E0', circleFg: '#FFFFFF', circleBorder: '#2D55E0', labelColor: '#1B1C20', weight: 600 };
+    const D = (name, note) => ({ name, note, isDone: true, isActive: false, isWaiting: false, weight: 400, color: '#3A3D45' });
+    const W = (name) => ({ name, note: 'Waiting', isDone: false, isActive: false, isWaiting: true, weight: 400, color: '#5E616B' });
+    return {
+      steps: [
+        { n: '1', label: 'Script', ...done },
+        { n: '2', label: 'Cast', ...done },
+        { n: '3', label: 'Storyboard (optional)', ...done },
+        { n: '4', label: 'Render', ...active }
+      ],
+      stages: [
+        D('Check script and cast', 'Passed'),
+        D('Make voices', 'Reused from preview'),
+        D('Sync mouths', '9 lines'),
+        D('Set emotions', '12 changes'),
+        D('Plan shots', '24 shots'),
+        D('Mix audio', '−14 LUFS'),
+        { name: 'Draw frames', note: 'Part 9 of 14', isDone: false, isActive: true, isWaiting: false, weight: 600, color: '#1B1C20' },
+        W('Join and save MP4')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

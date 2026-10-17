@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cast and character builder</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2D55E0}a:hover{color:#1F3FB0}
+</style>
+</helmet>
+<div style="min-height: 980px; background: #F5F5F2; color: #1B1C20; font-family: 'Instrument Sans', 'Segoe UI', sans-serif; display: flex; flex-wrap: wrap">
+  <nav aria-label="Main" style="flex: 1 1 200px; max-width: 240px; box-sizing: border-box; padding: 24px 16px; border-right: 1px solid #E2E2DC; background: #FFFFFF; display: flex; flex-direction: column; gap: 4px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 10px 24px">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="2" y="3" width="24" height="18" rx="6" fill="#2D55E0"></rect><path d="M8 20 L7 26 L14 20 Z" fill="#2D55E0"></path><circle cx="10" cy="12" r="2" fill="#FFFFFF"></circle><circle cx="18" cy="12" r="2" fill="#FFFFFF"></circle></svg>
+      <span style="font-size: 18px; font-weight: 600">ToonForge</span>
+    </div>
+    <a href="Main.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; background: #E8EDFC; color: #1F3FB0; font-weight: 600; font-size: 15px; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M10 9.5 L10 14.5 L14 12 Z"></path></svg>Projects</a>
+    <a href="Cast.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: #3A3D45; font-size: 15px; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20 C5.5 16 8.5 14 12 14 C15.5 14 18.5 16 20 20"></path></svg>Characters</a>
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: #3A3D45; font-size: 15px; text-decoration: none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6 L13 6 M19 6 L20 6 M4 12 L7 12 M13 12 L20 12 M4 18 L15 18"></path><circle cx="16" cy="6" r="2.5"></circle><circle cx="10" cy="12" r="2.5"></circle><circle cx="18" cy="18" r="2.5"></circle></svg>Settings</a>
+    <p style="margin: auto 12px 0; padding-top: 24px; font-size: 13px; color: #5E616B">Runs fully offline on this PC.</p>
+  </nav>
+
+  <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 28px 40px 48px">
+    <div style="max-width: 1120px; display: flex; flex-direction: column; gap: 24px">
+      <header style="display: flex; flex-direction: column; gap: 14px">
+        <p style="margin: 0; font-size: 14px; color: #5E616B"><a href="Main.dc.html">Projects</a> / The Missing Report</p>
+        <h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em">The Missing Report</h1>
+        <ol aria-label="Steps" style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px">
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+            <li style="display: flex; align-items: center; gap: 8px; font-size: 14.5px; color: {{s.labelColor}}; font-weight: {{s.weight}}">
+              <span style="width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; background: {{s.circleBg}}; color: {{s.circleFg}}; border: 1px solid {{s.circleBorder}}">{{s.n}}</span>{{s.label}}</li>
+          </sc-for>
+        </ol>
+      </header>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <section aria-label="Speakers" style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; gap: 10px">
+          <h2 style="margin: 0; font-size: 15px; font-weight: 600">Speakers in script</h2>
+          <button type="button" style="display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px; border: 1px solid #E2E2DC; border-radius: 10px; background: #FFFFFF; font: inherit; text-align: left; cursor: pointer">
+            <span style="width: 36px; height: 36px; border-radius: 50%; background: #2E5E52; flex: none"></span>
+            <span style="display: flex; flex-direction: column"><span style="font-weight: 600; font-size: 14.5px; color: #1B1C20">JADE</span><span style="font-size: 13px; color: #1D6A40">Jade, from library</span></span>
+          </button>
+          <button type="button" aria-pressed="true" style="display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px; border: 1.5px solid #2D55E0; border-radius: 10px; background: #F3F6FE; font: inherit; text-align: left; cursor: pointer">
+            <span style="width: 36px; height: 36px; border-radius: 50%; background: #27304F; flex: none"></span>
+            <span style="display: flex; flex-direction: column"><span style="font-weight: 600; font-size: 14.5px; color: #1B1C20">RON</span><span style="font-size: 13px; color: #1F3FB0">New character, editing</span></span>
+          </button>
+          <a href="Main.dc.html" style="font-size: 14px; padding: 8px 4px">Pick from library instead</a>
+        </section>
+
+        <section aria-label="Character builder" style="flex: 999 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E2DC; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 22px">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label for="desc" style="font-size: 15px; font-weight: 600">Describe Ron</label>
+            <textarea id="desc" rows="3" style="box-sizing: border-box; padding: 10px 12px; border: 1px solid #D4D4CD; border-radius: 8px; font: inherit; font-size: 15px; line-height: 1.5; color: #1B1C20; resize: vertical">Older man, silver hair, thick grey eyebrows, blue eyes, navy suit, red tie, news anchor</textarea>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+              <span style="font-size: 13px; color: #5E616B; margin-right: 2px">Applied:</span>
+              <sc-for list="{{matched}}" as="m" hint-placeholder-count="6"><span style="padding: 3px 10px; border-radius: 999px; background: #E3F2E8; color: #1D6A40; font-size: 13px">{{m}}</span></sc-for>
+            </div>
+            <p style="margin: 0; font-size: 13px; color: #5E616B">Not understood: “news anchor”. Set it with the controls below.</p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px 24px">
+            <sc-for list="{{sliders}}" as="r" hint-placeholder-count="6">
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <div style="display: flex; justify-content: space-between; font-size: 14px"><label for="{{r.id}}" style="font-weight: 500">{{r.label}}</label><span style="color: #5E616B">{{r.hint}}</span></div>
+                <input id="{{r.id}}" type="range" min="0" max="100" value="{{r.value}}" style="accent-color: #2D55E0; min-height: 28px">
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px 24px">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="hair" style="font-size: 14px; font-weight: 500">Hair style</label>
+              <select id="hair" style="min-height: 42px; padding: 0 10px; border: 1px solid #D4D4CD; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 15px; color: #1B1C20"><option>Swept back, short</option><option>Side part</option><option>Bald with sides</option></select>
+            </div>
+            <fieldset style="margin: 0; padding: 0; border: 0">
+              <legend style="padding: 0; margin-bottom: 6px; font-size: 14px; font-weight: 500">Hair color</legend>
+              <div style="display: flex; gap: 6px">
+                <button type="button" aria-label="Silver" aria-pressed="true" style="width: 40px; height: 40px; border-radius: 50%; background: #D9DCE1; border: 3px solid #FFFFFF; box-shadow: 0 0 0 2px #2D55E0; cursor: pointer"></button>
+                <button type="button" aria-label="Black" style="width: 40px; height: 40px; border-radius: 50%; background: #1E1A22; border: 3px solid #FFFFFF; box-shadow: 0 0 0 1px #C9C9C1; cursor: pointer"></button>
+                <button type="button" aria-label="Brown" style="width: 40px; height: 40px; border-radius: 50%; background: #6B4430; border: 3px solid #FFFFFF; box-shadow: 0 0 0 1px #C9C9C1; cursor: pointer"></button>
+                <button type="button" aria-label="Blond" style="width: 40px; height: 40px; border-radius: 50%; background: #D8B46A; border: 3px solid #FFFFFF; box-shadow: 0 0 0 1px #C9C9C1; cursor: pointer"></button>
+              </div>
+            </fieldset>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="outfit" style="font-size: 14px; font-weight: 500">Outfit</label>
+              <select id="outfit" style="min-height: 42px; padding: 0 10px; border: 1px solid #D4D4CD; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 15px; color: #1B1C20"><option>Suit and tie, navy</option><option>Blazer, charcoal</option><option>Hoodie</option></select>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="bg" style="font-size: 14px; font-weight: 500">Background</label>
+              <div style="display: flex; gap: 8px">
+                <select id="bg" style="flex: 1; min-width: 0; min-height: 42px; padding: 0 10px; border: 1px solid #D4D4CD; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 15px; color: #1B1C20"><option>Night city</option><option>Office</option><option>Studio</option><option>Living room</option></select>
+                <button type="button" aria-label="New background variation" style="width: 44px; min-height: 42px; border: 1px solid #D4D4CD; border-radius: 8px; background: #FFFFFF; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3A3D45" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12 A8 8 0 1 1 17.7 6.3"></path><path d="M20 4 L20 9 L15 9"></path></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid #E2E2DC; padding-top: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px 24px; align-items: end">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="voice" style="font-size: 14px; font-weight: 500">Voice</label>
+              <select id="voice" style="min-height: 42px; padding: 0 10px; border: 1px solid #D4D4CD; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 15px; color: #1B1C20"><option>Ryan, male, older (auto)</option><option>Alan, male, adult</option><option>Joe, male, young</option></select>
+            </div>
+            <button type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border: 1px solid #D4D4CD; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 15px; font-weight: 500; color: #1B1C20; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="#1B1C20" aria-hidden="true"><path d="M7 4 L20 12 L7 20 Z"></path></svg>Play sample line</button>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <div style="display: flex; justify-content: space-between; font-size: 14px"><label for="pitch" style="font-weight: 500">Pitch</label><span style="color: #5E616B">Slightly lower</span></div>
+              <input id="pitch" type="range" min="0" max="100" value="40" style="accent-color: #2D55E0; min-height: 28px">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <div style="display: flex; justify-content: space-between; font-size: 14px"><label for="speed" style="font-weight: 500">Speed</label><span style="color: #5E616B">Normal</span></div>
+              <input id="speed" type="range" min="0" max="100" value="50" style="accent-color: #2D55E0; min-height: 28px">
+            </div>
+          </div>
+        </section>
+
+        <section aria-label="Preview" style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+          <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 5; background: #27304F">
+            <svg viewBox="40 6 80 100" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Ron preview, smug expression"><rect x="0" y="0" width="160" height="110" fill="#27304F"></rect><rect x="22" y="18" width="16" height="92" fill="#1A2139"></rect><rect x="122" y="24" width="16" height="86" fill="#1A2139"></rect><rect x="126" y="32" width="2" height="2" fill="#F2C76B"></rect><rect x="30" y="40" width="2" height="2" fill="#F2C76B"></rect><path d="M44 110 C44 76 62 65 80 65 C98 65 116 76 116 110 Z" fill="#22325E"></path><path d="M72 66 L80 80 L88 66 Z" fill="#FFFFFF"></path><path d="M78.5 70 L81.5 70 L82.5 92 L80 96 L77.5 92 Z" fill="#A3262A"></path><rect x="74" y="55" width="12" height="12" fill="#D19C78"></rect><ellipse cx="64" cy="43" rx="2.5" ry="4" fill="#D19C78"></ellipse><ellipse cx="96" cy="43" rx="2.5" ry="4" fill="#D19C78"></ellipse><ellipse cx="80" cy="40" rx="16" ry="20" fill="#E2B08C"></ellipse><path d="M63 40 C60 22 70 12 81 12 C93 12 101 21 97 40 C96 30 92 24 86 23 C80 26 70 25 66 30 C64 33 64 37 63 40 Z" fill="#D9DCE1"></path><path d="M72 30 Q80 28.5 88 30" stroke="#C9936E" stroke-width="0.8" fill="none"></path><path d="M67 34 Q73 31 77 34" stroke="#8C9099" stroke-width="2.6" fill="none" stroke-linecap="round"></path><path d="M83 35 Q88 33 93 34" stroke="#8C9099" stroke-width="2.6" fill="none" stroke-linecap="round"></path><ellipse cx="72.5" cy="40" rx="3.6" ry="2.6" fill="#FFFFFF"></ellipse><ellipse cx="87.5" cy="40" rx="3.6" ry="2.6" fill="#FFFFFF"></ellipse><circle cx="73" cy="40.4" r="1.6" fill="#3E6FA8"></circle><circle cx="88" cy="40.4" r="1.6" fill="#3E6FA8"></circle><path d="M68.6 38.6 Q72.5 37 76.4 38.6" stroke="#B9835F" stroke-width="1.4" fill="none"></path><path d="M83.6 38.6 Q87.5 37 91.4 38.6" stroke="#B9835F" stroke-width="1.4" fill="none"></path><path d="M80 41 L78 48 L81 48" stroke="#B9835F" stroke-width="1.2" fill="none" stroke-linecap="round"></path><path d="M74 53 Q80 55 86 51" stroke="#6E3B2C" stroke-width="1.6" fill="none" stroke-linecap="round"></path></svg>
+          </div>
+          <fieldset style="margin: 0; padding: 0; border: 0">
+            <legend style="padding: 0; margin-bottom: 8px; font-size: 14px; font-weight: 500">Try an expression</legend>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px">
+              <sc-for list="{{emotions}}" as="e" hint-placeholder-count="6">
+                <button type="button" aria-pressed="{{e.pressed}}" style="min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{e.border}}; background: {{e.bg}}; color: {{e.fg}}; font: inherit; font-size: 13.5px; cursor: pointer">{{e.label}}</button>
+              </sc-for>
+            </div>
+          </fieldset>
+          <div style="display: flex; gap: 8px">
+            <button type="button" style="flex: 1; min-height: 44px; border: 1px solid #D4D4CD; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 15px; font-weight: 500; color: #1B1C20; cursor: pointer">Randomize</button>
+            <button type="button" style="flex: 1; min-height: 44px; border: 0; border-radius: 8px; background: #1B1C20; font: inherit; font-size: 15px; font-weight: 600; color: #FFFFFF; cursor: pointer">Save to library</button>
+          </div>
+        </section>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; border-top: 1px solid #E2E2DC; padding-top: 20px">
+        <a href="Render.dc.html" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 18px; border-radius: 8px; border: 1px solid #D4D4CD; background: #FFFFFF; color: #1B1C20; font-weight: 500; font-size: 15px; text-decoration: none">Skip storyboard and render</a>
+        <a href="Storyboard.dc.html" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 18px; border-radius: 8px; background: #2D55E0; color: #FFFFFF; font-weight: 600; font-size: 15px; text-decoration: none">Continue to storyboard</a>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const done = { circleBg: '#E3F2E8', circleFg: '#1D6A40', circleBorder: '#B9DEC6', labelColor: '#3A3D45', weight: 400 };
+    const active = { circleBg: '#2D55E0', circleFg: '#FFFFFF', circleBorder: '#2D55E0', labelColor: '#1B1C20', weight: 600 };
+    const todo = { circleBg: '#FFFFFF', circleFg: '#5E616B', circleBorder: '#C9C9C1', labelColor: '#5E616B', weight: 400 };
+    const off = { pressed: 'false', border: '#D4D4CD', bg: '#FFFFFF', fg: '#1B1C20' };
+    const on = { pressed: 'true', border: '#2D55E0', bg: '#2D55E0', fg: '#FFFFFF' };
+    return {
+      steps: [
+        { n: '1', label: 'Script', ...done },
+        { n: '2', label: 'Cast', ...active },
+        { n: '3', label: 'Storyboard (optional)', ...todo },
+        { n: '4', label: 'Render', ...todo }
+      ],
+      matched: ['Male', 'Elderly', 'Silver hair', 'Thick brows', 'Blue eyes', 'Navy suit', 'Red tie'],
+      sliders: [
+        { id: 'head', label: 'Head width', hint: 'Narrow', value: 38 },
+        { id: 'jaw', label: 'Jaw', hint: 'Square', value: 70 },
+        { id: 'eyes', label: 'Eye size', hint: 'Small', value: 30 },
+        { id: 'nose', label: 'Nose length', hint: 'Long', value: 72 },
+        { id: 'age', label: 'Age lines', hint: 'Visible', value: 64 },
+        { id: 'hairvol', label: 'Hair volume', hint: 'Medium', value: 50 }
+      ],
+      emotions: [
+        { label: 'Neutral', ...off }, { label: 'Happy', ...off }, { label: 'Angry', ...off },
+        { label: 'Smug', ...on }, { label: 'Surprised', ...off }, { label: 'Sad', ...off }, { label: 'Thinking', ...off }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

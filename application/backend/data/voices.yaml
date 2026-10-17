@@ -1,0 +1,60 @@
+# Piper voices bundled in vendor/piper_voices/. Add a voice by dropping its .onnx + .onnx.json
+# files there and adding an entry here.
+# ages: age groups this voice is auto-picked for (child, young, adult, middle, elderly).
+
+voices:
+  - id: ryan
+    name: Ryan
+    gender: male
+    ages: [adult, middle]
+    model: en_US-ryan-medium
+  - id: joe
+    name: Joe
+    gender: male
+    ages: [young, child, adult]
+    model: en_US-joe-medium
+  - id: john
+    name: John
+    gender: male
+    ages: [middle, adult]
+    model: en_US-john-medium
+  - id: norman
+    name: Norman
+    gender: male
+    ages: [elderly, middle]
+    model: en_US-norman-medium
+  - id: amy
+    name: Amy
+    gender: female
+    ages: [adult, young]
+    model: en_US-amy-medium
+  - id: kristin
+    name: Kristin
+    gender: female
+    ages: [young, child, adult]
+    model: en_US-kristin-medium
+  - id: hazel
+    name: Hazel
+    gender: female
+    ages: [middle, adult]
+    model: en_US-hfc_female-medium
+  - id: kathleen
+    name: Kathleen
+    gender: female
+    ages: [elderly, middle]
+    model: en_US-kathleen-low
+
+# Extra pitch (semitones) by age group, added on top of the character's pitch slider.
+age_pitch:
+  child: 3.5
+  young: 0.6
+  adult: 0.0
+  middle: -0.3
+  elderly: -0.6
+
+# The character pitch slider (-1..1) maps to this many semitones at each end.
+pitch_range_semitones: 4.0
+# The character speed slider (-1..1) maps to this speed factor range.
+speed_range: [0.8, 1.25]
+
+sample_text: "Hi, I'm {name}. This is how I sound when I'm talking to you."

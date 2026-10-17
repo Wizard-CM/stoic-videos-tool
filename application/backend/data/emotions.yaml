@@ -1,0 +1,165 @@
+# The 12 emotion presets.
+# rig:      face rig values at intensity 1.0 (missing controls stay at 0). Intensity scales them.
+# delivery: how the voice changes at intensity 1.0 (speed factor, pitch in semitones, volume in dB).
+# reaction: what a listener's face does while this emotion is spoken to them.
+#
+# Rig controls (all default 0):
+#   brow_inner_raise, brow_outer_raise, brow_lower, brow_asym      (-1..1)
+#   lid_upper (1 = closed), lid_lower, eye_widen, eye_squint       (0..1)
+#   pupil_x, pupil_y (+ = down), pupil_size                        (-1..1)
+#   mouth_corner (+ = smile), mouth_stretch, mouth_press,
+#   mouth_open, mouth_asym                                          (-1..1)
+#   cheek_raise                                                     (0..1)
+#   head_tilt, head_turn, head_nod (+ = chin down)                  (-1..1)
+
+default_intensity: 0.7
+blend_frames: 8
+
+emotions:
+  neutral:
+    label: Neutral
+    rig: {}
+    delivery: {speed: 1.0, pitch: 0.0, volume: 0.0}
+    reaction: {emotion: neutral, intensity: 0.0}
+
+  happy:
+    label: Happy
+    rig: {mouth_corner: 0.85, cheek_raise: 0.7, lid_lower: 0.3, eye_squint: 0.25, brow_inner_raise: 0.2, brow_outer_raise: 0.25, mouth_open: 0.12, head_tilt: 0.12}
+    delivery: {speed: 1.05, pitch: 0.8, volume: 1.0}
+    reaction: {emotion: happy, intensity: 0.5}
+
+  excited:
+    label: Excited
+    rig: {mouth_corner: 1.0, mouth_open: 0.45, eye_widen: 0.55, brow_inner_raise: 0.6, brow_outer_raise: 0.7, cheek_raise: 0.7, head_nod: -0.12}
+    delivery: {speed: 1.12, pitch: 1.6, volume: 2.5}
+    reaction: {emotion: happy, intensity: 0.65}
+
+  sad:
+    label: Sad
+    rig: {mouth_corner: -0.75, brow_inner_raise: 0.85, brow_outer_raise: -0.45, lid_upper: 0.38, pupil_y: 0.45, head_nod: 0.3, mouth_press: 0.2, head_tilt: -0.1}
+    delivery: {speed: 0.88, pitch: -0.8, volume: -3.0}
+    reaction: {emotion: sad, intensity: 0.5}
+
+  angry:
+    label: Angry
+    rig: {brow_lower: 0.85, brow_outer_raise: 0.2, lid_upper: 0.12, lid_lower: 0.35, eye_squint: 0.3, mouth_corner: -0.45, mouth_press: 0.45, head_nod: 0.12}
+    delivery: {speed: 1.08, pitch: 0.3, volume: 3.0}
+    reaction: {emotion: surprised, intensity: 0.4}
+
+  furious:
+    label: Furious
+    rig: {brow_lower: 1.0, brow_outer_raise: 0.35, lid_lower: 0.45, eye_widen: 0.3, mouth_corner: -0.6, mouth_open: 0.35, mouth_stretch: 0.75, head_nod: 0.18}
+    delivery: {speed: 1.12, pitch: 0.6, volume: 4.5}
+    reaction: {emotion: scared, intensity: 0.55}
+
+  surprised:
+    label: Surprised
+    rig: {brow_inner_raise: 0.9, brow_outer_raise: 0.9, eye_widen: 0.7, mouth_open: 0.35, head_nod: -0.15}
+    delivery: {speed: 1.05, pitch: 1.2, volume: 1.5}
+    reaction: {emotion: confused, intensity: 0.4}
+
+  shocked:
+    label: Shocked
+    rig: {brow_inner_raise: 1.0, brow_outer_raise: 1.0, eye_widen: 1.0, pupil_size: -0.45, mouth_open: 0.7, mouth_stretch: 0.2, head_nod: -0.25}
+    delivery: {speed: 1.0, pitch: 1.5, volume: 2.0}
+    reaction: {emotion: surprised, intensity: 0.6}
+
+  scared:
+    label: Scared
+    rig: {brow_inner_raise: 1.0, brow_outer_raise: 0.25, brow_lower: 0.2, eye_widen: 0.8, mouth_stretch: 0.6, mouth_corner: -0.35, mouth_open: 0.2, pupil_size: -0.35, head_nod: 0.12}
+    delivery: {speed: 1.1, pitch: 1.0, volume: -1.0}
+    reaction: {emotion: sad, intensity: 0.4}
+
+  smug:
+    label: Smug
+    rig: {mouth_asym: 0.75, mouth_corner: 0.4, lid_upper: 0.35, brow_asym: 0.6, brow_outer_raise: 0.2, head_tilt: -0.15, head_nod: -0.12}
+    delivery: {speed: 0.95, pitch: -0.4, volume: 0.0}
+    reaction: {emotion: angry, intensity: 0.4}
+
+  confused:
+    label: Confused
+    rig: {brow_asym: 0.85, brow_lower: 0.3, brow_inner_raise: 0.3, mouth_asym: -0.4, mouth_corner: -0.15, head_tilt: 0.3, eye_squint: 0.2}
+    delivery: {speed: 0.97, pitch: 0.4, volume: -0.5}
+    reaction: {emotion: thinking, intensity: 0.4}
+
+  thinking:
+    label: Thinking
+    rig: {pupil_x: 0.3, pupil_y: -0.65, brow_asym: 0.45, brow_lower: 0.2, mouth_press: 0.45, mouth_asym: 0.3, head_tilt: 0.2}
+    delivery: {speed: 0.9, pitch: -0.3, volume: -1.5}
+    reaction: {emotion: neutral, intensity: 0.0}
+
+# Other words people write in tags, mapped to a preset.
+aliases:
+  calm: neutral
+  serious: neutral
+  flat: neutral
+  glad: happy
+  joyful: happy
+  cheerful: happy
+  pleased: happy
+  thrilled: excited
+  eager: excited
+  upset: sad
+  unhappy: sad
+  depressed: sad
+  hurt: sad
+  annoyed: angry
+  irritated: angry
+  mad: angry
+  frustrated: angry
+  enraged: furious
+  rage: furious
+  livid: furious
+  amazed: surprised
+  astonished: surprised
+  horrified: shocked
+  stunned: shocked
+  afraid: scared
+  fearful: scared
+  nervous: scared
+  worried: scared
+  arrogant: smug
+  cocky: smug
+  puzzled: confused
+  unsure: confused
+  pensive: thinking
+  curious: thinking
+
+# Rules for lines without a tag.
+rules:
+  default_intensity: 0.6
+  exclamation_boost: 0.2      # "!" raises intensity
+  question_brow_raise: 0.3    # "?" raises the brows
+  words:
+    liar: angry
+    lied: angry
+    hate: angry
+    idiot: angry
+    stupid: angry
+    ridiculous: angry
+    furious: furious
+    wow: surprised
+    whoa: surprised
+    really: surprised
+    unbelievable: shocked
+    impossible: shocked
+    "oh no": scared
+    help: scared
+    afraid: scared
+    sorry: sad
+    miss: sad
+    unfortunately: sad
+    great: happy
+    thanks: happy
+    "thank you": happy
+    love: happy
+    awesome: excited
+    amazing: excited
+    "yes": happy
+    hmm: thinking
+    maybe: thinking
+    perhaps: thinking
+    "what?": confused
+    huh: confused
+    obviously: smug
+    "of course": smug

@@ -1,0 +1,33 @@
+# ToonForge app settings. Edit and restart the app to apply.
+
+# Where finished MP4s are saved. "~" is your home folder.
+output_folder: ~/Videos/ToonForge
+
+# Pipeline stages, in order. Remove a stage here only if you know what it does.
+pipeline: [parse, cast, voice, lipsync, emotion, timeline, mix, render, encode]
+
+# Plug-in providers, chosen by name.
+providers:
+  tts: piper
+  lipsync: rhubarb        # falls back to "amplitude" when the Rhubarb binary is missing
+  music: procedural
+
+# Feature switches.
+features:
+  storyboard: true
+  music: true
+
+# Default Piper voice per gender when nothing else matches (ids from data/voices.yaml).
+default_voices:
+  male: ryan
+  female: amy
+
+render:
+  fps: 24
+  chunk_seconds: 30
+  x264_preset: veryfast
+  x264_crf: 20
+
+storyboard:
+  frame_count: 16
+  preview_seconds: 14
