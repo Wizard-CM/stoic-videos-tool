@@ -11,11 +11,16 @@ from fastapi import HTTPException
 from app.core.paths import claude_task_cancel_path, claude_task_dir, claude_task_path
 from app.core.timestamps import now_iso
 from app.jobs import claude_tasks
+from app.services import backgrounds as background_service
 from app.services import characters as character_service
 from app.services import claude as claude_service
+from app.services import projects as project_service
+from app.store import backgrounds as background_store
 from app.store import characters as character_store
-from app.store.json_files import write_json
+from app.store.json_files import read_json, write_json
 from engine.puppet.kit import check_kit
+from engine.scene.backgrounds import check_background
+from engine.script.parser import parse_script
 
 TASK_KEYS = {"id", "kind", "state", "title", "message", "activity", "result", "error", "cost_usd", "started_at", "updated_at"}
 MAX_REQUEST = {"name": "Max", "description": "a tired barista", "gender": "male", "age": None}
@@ -80,9 +85,52 @@ def test_a_revision_task_keeps_the_character_id(clean_storage, no_task_process, 
     assert len(character_store.load_all_characters()) == 1
 
 
+def test_a_background_task_designs_and_saves_a_new_background(clean_storage, no_task_process):
+    task_id = _start_and_run("background", {"name": "Office", "description": "a calm office"}, no_task_process)
+
+    task = claude_tasks.get_task(task_id)
+    assert task["state"] == "done" and task["title"] == "Designing the Office background"
+
+    background = background_store.load_background(task["result"]["background_id"])
+    assert task["result"] == {"background_id": background["id"]}
+    assert background["name"] == "Office" and background["made_by"]["task_id"] == task_id
+    errors, _ = check_background(background["art"])
+    assert errors == []
+
+
+def test_a_background_revision_task_keeps_the_background_id(clean_storage, no_task_process, mini_background):
+    saved = background_service.save_new_background({"id": None, "name": "Office", "description": "a calm office",
+                                                     "art": mini_background, "made_by": None})
+
+    task_id = _start_and_run("background_revision", {"background_id": saved["id"], "feedback": "add a plant"}, no_task_process)
+
+    task = claude_tasks.get_task(task_id)
+    assert task["state"] == "done" and task["title"] == "Revising the Office background"
+    assert task["result"] == {"background_id": saved["id"]}
+
+    revised = background_store.load_background(saved["id"])
+    assert revised["made_by"]["task_id"] == task_id and revised["created_at"] == saved["created_at"]
+    assert len(background_store.load_all_backgrounds()) == 1
+
+
+def test_a_script_task_writes_a_script_with_the_library_cast(clean_storage, no_task_process, mini_character):
+    character_service.save_new_character(mini_character)
+    project = project_service.create_project("Report")
+    request = {"project_id": project["id"], "idea": "a missing report", "length": "short", "use_library": True}
+
+    task_id = _start_and_run("script", request, no_task_process)
+
+    task = claude_tasks.get_task(task_id)
+    assert task["state"] == "done" and task["title"] == "Writing the script"
+    assert set(task["result"]) == {"title", "script"} and task["result"]["title"]
+    parsed = parse_script(task["result"]["script"])
+    assert parsed.errors == [] and "JADE" in parsed.speakers
+    assert read_json(claude_task_dir(task_id) / "inputs.json")["target_seconds"] == 30
+
+
 def test_kinds_that_are_not_built_yet_are_refused(clean_storage, no_task_process):
     with pytest.raises(HTTPException) as refused:
-        claude_service.start_task("background", {"name": "Office", "description": "a calm office"})
+        claude_service.start_task("storyboard", {"name": "Office", "description": "a calm office"})
     assert refused.value.status_code == 409 and refused.value.detail == claude_service.NOT_BUILT_MESSAGE
     assert no_task_process == []
 

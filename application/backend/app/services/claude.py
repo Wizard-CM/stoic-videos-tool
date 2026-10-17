@@ -1,4 +1,4 @@
-"""Claude status, the connection test, and the Claude tasks (design or revise a character)."""
+"""Claude status, the connection test, and the Claude tasks (design or revise a character or a background, write a script)."""
 
 import asyncio
 import importlib.util
@@ -24,7 +24,7 @@ NOT_SIGNED_IN = (
     "Claude isn't signed in yet. Run `claude login` to sign in with your Claude Pro/Max subscription, or set the "
     "{env} environment variable to an Anthropic API key and restart ToonForge."
 )
-SUPPORTED_KINDS = ("character", "character_revision")
+SUPPORTED_KINDS = ("character", "character_revision", "background", "background_revision", "script")
 AUTH_STATUS_TIMEOUT_SECONDS = 5
 TEST_PROMPT = "Reply with exactly: OK"
 TEST_MAX_TURNS = 1

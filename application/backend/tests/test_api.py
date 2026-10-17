@@ -107,4 +107,4 @@ def test_claude_is_ready_in_test_mode_and_generation_starts_a_task(client, no_ta
 
     revise = client.post("/api/characters/jade-example/revise", json={"feedback": "a red scarf"})
     assert revise.status_code == 202 and revise.json()["task_id"].startswith("t-")
-    assert client.post("/api/backgrounds/generate", json={"name": "Office", "description": "a calm office"}).status_code == 409
+    assert client.post("/api/backgrounds/generate", json={"name": "Office", "description": "a calm office"}).status_code == 202

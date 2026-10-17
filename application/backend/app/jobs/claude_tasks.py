@@ -1,7 +1,8 @@
-"""Runs Claude tasks (design or revise a character) in separate processes, up to three at a time.
+"""Runs Claude tasks (design or revise a character or a background, write a script) in separate processes, up to
+three at a time.
 
 The API process starts a task with start_task(). The task process runs run_claude_task(), writes its activity to
-storage/claude/<task_id>/task.json and, when it ends, saves the character. The API reads task.json.
+storage/claude/<task_id>/task.json and, when it ends, saves the character or background. The API reads task.json.
 """
 
 import multiprocessing
@@ -16,10 +17,14 @@ from fastapi import HTTPException
 from app.core.paths import CLAUDE_TASKS_DIR, claude_task_cancel_path, claude_task_dir, claude_task_path
 from app.core.timestamps import now_iso
 from app.jobs.processes import pid_is_running, remember_process, started_processes
+from app.services import backgrounds as background_service
 from app.services import characters as character_service
+from app.store import backgrounds as background_store
 from app.store import characters as character_store
 from app.store.json_files import read_json, write_json
+from claude_layer.background import design_background
 from claude_layer.character import design_character
+from claude_layer.script import write_script
 from engine.errors import Cancelled, PipelineError
 
 START_LOCK = threading.Lock()
@@ -29,7 +34,20 @@ MAX_ACTIVITY = 60
 RECENT_TASK_WINDOW = timedelta(hours=1)
 TASK_ID_PATTERN = re.compile(r"^t-[0-9a-f]{6}$")
 PID_KEY = "_pid"  # internal: the task process, for the "is it still alive?" check
-TASK_VERBS = {"character": "designing the character", "character_revision": "revising the character"}
+TASK_VERBS = {
+    "character": "designing the character",
+    "character_revision": "revising the character",
+    "background": "designing the background",
+    "background_revision": "revising the background",
+    "script": "writing the script",
+}
+TASK_FUNCTIONS = {
+    "character": design_character,
+    "character_revision": design_character,
+    "background": design_background,
+    "background_revision": design_background,
+    "script": write_script,
+}
 
 
 # ---------- task.json ----------
@@ -88,18 +106,33 @@ def _set_task_pid(task_id: str, pid: int) -> None:
 # ---------- API side: start, cancel, read ----------
 
 def _task_inputs_and_title(task_id: str, kind: str, inputs: dict) -> tuple[dict, str]:
-    """What design_character needs, and the title the UI shows."""
+    """What the task function needs, and the title the UI shows."""
     if kind == "character":
         return {**inputs, "task_id": task_id}, f"Designing {inputs['name']}"
 
-    character = character_store.load_character(inputs["character_id"])
-    if character is None:
-        raise HTTPException(status_code=404, detail="That character was not found.")
-    return {"character": character, "feedback": inputs["feedback"], "task_id": task_id}, f"Revising {character['name']}"
+    if kind == "character_revision":
+        character = character_store.load_character(inputs["character_id"])
+        if character is None:
+            raise HTTPException(status_code=404, detail="That character was not found.")
+        return {"character": character, "feedback": inputs["feedback"], "task_id": task_id}, f"Revising {character['name']}"
+
+    if kind == "background":
+        return {**inputs, "task_id": task_id}, f"Designing the {inputs['name']} background"
+
+    if kind == "background_revision":
+        background = background_store.load_background(inputs["background_id"])
+        if background is None:
+            raise HTTPException(status_code=404, detail="That background was not found.")
+        return {"background": background, "feedback": inputs["feedback"], "task_id": task_id}, f"Revising the {background['name']} background"
+
+    characters = []
+    if inputs.get("use_library"):
+        characters = [{"name": character["name"], "description": character["description"]} for character in character_service.list_characters()]
+    return {"idea": inputs["idea"], "length": inputs["length"], "characters": characters, "task_id": task_id}, "Writing the script"
 
 
 def start_task(kind: str, inputs: dict) -> dict:
-    """Starts a "character" or "character_revision" task. The caller checks that Claude is ready."""
+    """Starts a task of one of the TASK_FUNCTIONS kinds. The caller checks that Claude is ready."""
     with START_LOCK:
         running_count = sum(1 for task in _read_all_tasks() if task["state"] in RUNNING_STATES)
         if running_count >= MAX_RUNNING_TASKS:
@@ -186,6 +219,24 @@ def _save_character(kind: str, record: dict) -> str:
     return record["id"]
 
 
+def _save_background(kind: str, record: dict) -> str:
+    """Saves the designed background and returns its id. A revision keeps the background's id."""
+    if kind == "background":
+        return background_service.save_new_background(record)["id"]
+    record["updated_at"] = now_iso()
+    background_store.save_background(record)
+    return record["id"]
+
+
+def _save_result(kind: str, record: dict) -> dict:
+    """Saves what the task made and returns the task's result."""
+    if kind in ("character", "character_revision"):
+        return {"character_id": _save_character(kind, record)}
+    if kind in ("background", "background_revision"):
+        return {"background_id": _save_background(kind, record)}
+    return {"title": record["title"], "script": record["script"]}
+
+
 def _end_task(task_id: str, changes: dict) -> None:
     task = read_json(claude_task_path(task_id))
     task.update(changes)
@@ -202,8 +253,9 @@ def run_claude_task(task_id: str, kind: str, inputs: dict) -> None:
 
     try:
         workspace = claude_task_dir(task_id)
-        record = design_character(inputs, workspace, _make_activity_writer(task_id), lambda: claude_task_cancel_path(task_id).exists())
-        character_id = _save_character(kind, record)
+        task_function = TASK_FUNCTIONS[kind]
+        record = task_function(inputs, workspace, _make_activity_writer(task_id), lambda: claude_task_cancel_path(task_id).exists())
+        result = _save_result(kind, record)
     except Cancelled:
         _end_task(task_id, {"state": "cancelled", "message": "Cancelled"})
     except PipelineError as error:
@@ -214,5 +266,4 @@ def run_claude_task(task_id: str, kind: str, inputs: dict) -> None:
         message = f"Something went wrong while {TASK_VERBS[kind]} ({type(error).__name__}). Details are in {log_path}."
         _end_task(task_id, {"state": "failed", "message": "Failed", "error": message})
     else:
-        result = {"character_id": character_id}
         _end_task(task_id, {"state": "done", "message": "Done", "result": result, "cost_usd": record["made_by"]["cost_usd"]})

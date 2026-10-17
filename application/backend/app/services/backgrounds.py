@@ -9,7 +9,15 @@ from app.core.timestamps import now_iso
 from app.store import backgrounds as background_store
 from app.store import characters as character_store
 from engine.config import EXAMPLES_DIR
+from engine.puppet.character import make_character_id
 from engine.scene.backgrounds import render_background_png
+
+
+def _make_unused_background_id(name: str) -> str:
+    background_id = make_character_id(name)
+    while background_store.load_background(background_id):
+        background_id = make_character_id(name)
+    return background_id
 
 
 def get_background(background_id: str) -> dict:
@@ -22,6 +30,15 @@ def get_background(background_id: str) -> dict:
 def list_backgrounds() -> list[dict]:
     backgrounds = sorted(background_store.load_all_backgrounds(), key=lambda background: background["name"].lower())
     return [{key: value for key, value in background.items() if key != "art"} for background in backgrounds]
+
+
+def save_new_background(background: dict) -> dict:
+    """Saves a background that has no id yet (used by Claude tasks)."""
+    new = dict(background)
+    new["id"] = _make_unused_background_id(new["name"])
+    new["created_at"] = new["updated_at"] = now_iso()
+    background_store.save_background(new)
+    return new
 
 
 def update_background(background_id: str, changes: dict) -> dict:
