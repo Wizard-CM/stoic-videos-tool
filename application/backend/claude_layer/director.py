@@ -83,7 +83,9 @@ class ClaudeDirector(DirectorProvider):
 
         stored = {"title": brief.get("title"), "aspect": brief.get("aspect"), "fps": brief.get("fps"), "speakers": speakers,
                   "missing_backgrounds": missing_backgrounds}
-        written = prepare_workspace(workspace, "", stored, ["DIRECTION.md", "PUPPET_KIT.md"], ["directions", "backgrounds"])
+        docs = ["DIRECTION.md", "PUPPET_KIT.md"] if missing_backgrounds else ["DIRECTION.md"]
+        example_groups = ["directions", "backgrounds"] if missing_backgrounds else ["directions"]
+        written = prepare_workspace(workspace, "", stored, docs, example_groups)
         has_reference = any(path.startswith("examples/directions/") for path in written["examples"])
         write_json(workspace / "brief.json", brief)
         for speaker, character in cast.items():

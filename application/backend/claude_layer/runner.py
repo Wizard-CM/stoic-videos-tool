@@ -51,6 +51,9 @@ MAX_ACTIVITY_TEXT = 200
 MAX_ERROR_DETAIL = 300
 STDERR_LINES_KEPT = 40
 MAX_TOOL_RESULT_CHARS = 4_000_000  # check tools return large images; keep them inline for Claude
+# The SDK's subprocess transport defaults to a 1 MB cap per stdout line and raises CLIJSONDecodeError past it, well
+# under what a check/preview tool's image can produce. Give it enough headroom above MAX_TOOL_RESULT_CHARS.
+MAX_SDK_BUFFER_BYTES = 8_000_000
 MAX_MCP_OUTPUT_TOKENS = "200000"
 CLIENT_APP = "toonforge/2.0"
 
@@ -346,6 +349,7 @@ def build_options(task: str, workspace: Path, tools: list, settings: dict, stder
         "env": claude_env(settings),
         "stderr": stderr,
         "forward_subagent_text": True,
+        "max_buffer_size": MAX_SDK_BUFFER_BYTES,
     }
     if settings["cli_path"]:
         options["cli_path"] = settings["cli_path"]

@@ -271,6 +271,22 @@ def test_claude_provider_directs_and_designs_the_missing_background(tmp_path, mi
     assert fractions[-1] == 1.0
 
 
+def test_claude_provider_skips_the_background_spec_when_nothing_is_missing(tmp_path, mini_background):
+    """No speaker needs a new background, so the lead shouldn't be told to read the background spec or examples."""
+    brief = reference_brief()
+    cast = {speaker: json.loads((EXAMPLES_DIR / "characters" / f"{speaker.lower()}.json").read_text(encoding="utf-8"))
+            for speaker in brief["speakers"]}
+    backgrounds = {"JADE": mini_background, "RON": mini_background}
+
+    result = get_director_provider("claude").direct(brief, tmp_path, lambda fraction, text: None, lambda: False, cast=cast, backgrounds=backgrounds)
+
+    assert result["backgrounds"] == {}
+    assert not (tmp_path / "docs" / "PUPPET_KIT.md").exists()
+    assert not (tmp_path / "examples" / "backgrounds").exists()
+    assert (tmp_path / "docs" / "DIRECTION.md").exists()
+    assert (tmp_path / "examples" / "directions" / "reference_scene.json").exists()
+
+
 def test_unknown_director_is_a_plain_error():
     with pytest.raises(PipelineError, match="Unknown director"):
         get_director_provider("nope")

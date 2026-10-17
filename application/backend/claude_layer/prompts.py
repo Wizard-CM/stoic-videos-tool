@@ -423,9 +423,11 @@ def direction_task_md(brief: dict, missing_backgrounds: list[str], has_previews:
             "parallel: it writes backgrounds/<SPEAKER>.json and checks it with check_background (file and character set to that "
             "speaker). Review the previews yourself."
         )
+        background_spec_text = "- docs/PUPPET_KIT.md and examples/backgrounds/: the background format and examples (for the sets you design).\n"
     else:
         backgrounds_text = "2. No backgrounds: every speaker already has one."
         backgrounds_plan = "4. (No backgrounds to design.)"
+        background_spec_text = ""
     return f"""\
 # Task: direct the video "{brief.get("title") or "Untitled"}"
 
@@ -436,8 +438,7 @@ def direction_task_md(brief: dict, missing_backgrounds: list[str], has_previews:
 {preview_text}
 - docs/DIRECTION.md: the direction format and what good direction looks like. Read all of it.
 {reference_text}
-- docs/PUPPET_KIT.md and examples/backgrounds/: the background format and examples (for the sets you design).
-
+{background_spec_text}
 ## What to make
 1. direction.json: the full direction ("format": "toonforge-direction/1") with shots, events and notes.
 {backgrounds_text}
