@@ -1,8 +1,18 @@
 """Command line front end: render a script to MP4, or make its storyboard, without the web app.
 
-    python cli.py render SCRIPT [--cast CAST.json] [--out OUT.mp4] [--aspect 16:9|9:16] [--quality 1080p|720p]
-                                [--no-music] [--tts piper|fake] [--lipsync rhubarb|amplitude]
-    python cli.py storyboard SCRIPT [same options]
+    python cli.py render SCRIPT --cast CAST.json [--out OUT.mp4] [--aspect 16:9|9:16] [--quality 1080p|720p]
+                                [--title TITLE] [--no-music] [--tts piper|fake] [--lipsync rhubarb|amplitude]
+                                [--director basic|claude] [--direction DIRECTION.json]
+    python cli.py storyboard SCRIPT --cast CAST.json [same options]
+
+CAST.json maps each speaker in the script to a character (and, optionally, a background) from the library:
+    {"JADE": {"character": "data/examples/characters/jade.json", "background": "data/examples/backgrounds/office.json"},
+     "RON": {"character": "data/examples/characters/ron.json"}}
+A speaker with no "background" gets the director's own choice (or the plain default background).
+
+--direction plays back a direction you already have instead of asking a director provider for one. It accepts
+either a bare direction object ({"format", "shots", "events", ...}) or the examples' {"about", "brief", "direction"}
+shape (only the "direction" part is used; the script's own brief is still built from SCRIPT and CAST.json).
 """
 
 import argparse
@@ -10,63 +20,54 @@ import dataclasses
 import json
 import sys
 import time
-import zlib
 from pathlib import Path
 
 from app.core.paths import PROJECTS_DIR
-from engine.character.keywords import autofill_character
-from engine.character.params import new_character, normalize_character, pick_auto_voice, randomize_character
 from engine.config import load_config
+from engine.direction.providers import DIRECTOR_PROVIDERS, DirectorProvider
 from engine.errors import Cancelled, PipelineError
+from engine.pipeline.cache import hash_of
 from engine.pipeline.context import PipelineContext
 from engine.pipeline.runner import run_pipeline
 from engine.pipeline.storyboard import run_storyboard
-from engine.script.parser import parse_script
 
-AGE_NAMES = {"middle-aged": "middle", "middle aged": "middle", "old": "elderly"}
-GENDERS_FOR_MISSING_SPEAKERS = ["male", "female"]
 PERCENT_STEP_TO_PRINT = 5.0
 
 
-def read_cast_file(cast_path: str | None) -> dict:
+class GivenDirector(DirectorProvider):
+    """Plays back a direction the caller already has, instead of asking a director provider for one."""
+
+    def __init__(self, direction: dict):
+        self.direction = direction
+
+    def direct(self, brief, workspace, report, should_cancel, cast=None, backgrounds=None) -> dict:
+        return {"direction": self.direction, "backgrounds": {}, "notes": "Given directly (--direction).", "cost_usd": None}
+
+
+def read_json_file(path: str) -> dict:
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def load_cast_and_backgrounds(cast_path: str | None) -> tuple[dict, dict]:
+    """cast.json's {"character": path, "background": path} entries, loaded into the records the pipeline wants."""
     if cast_path is None:
-        return {}
-    return json.loads(Path(cast_path).read_text(encoding="utf-8"))
+        return {}, {}
+    cast_file = read_json_file(cast_path)
+    cast, backgrounds = {}, {}
+    for speaker, entry in cast_file.items():
+        cast[speaker] = read_json_file(entry["character"])
+        background_path = entry.get("background")
+        backgrounds[speaker] = read_json_file(background_path)["art"] if background_path else None
+    return cast, backgrounds
 
 
-def character_seed(project_id: str, speaker: str) -> int:
-    return zlib.crc32(f"{project_id}:{speaker}".encode("utf-8")) % 1_000_000
-
-
-def build_character(speaker: str, entry: dict | None, position: int, project_id: str, used_voices: list[str]) -> dict:
-    """A character from a cast entry: a full character dict, a {gender, age, description} summary, or nothing (random)."""
-    if entry is not None and "params" in entry:
-        character = normalize_character({"name": speaker, **entry})
-        used_voices.append(character["voice"]["voice_id"])
-        return character
-
-    seed = character_seed(project_id, speaker)
-    entry = entry or {}
-    gender = entry.get("gender") or GENDERS_FOR_MISSING_SPEAKERS[position % len(GENDERS_FOR_MISSING_SPEAKERS)]
-    character = new_character(speaker, gender, seed)
-    if "age" in entry:
-        character["params"]["age"] = AGE_NAMES.get(entry["age"], entry["age"])
-    if entry.get("description"):
-        character, _applied, _unknown = autofill_character(entry["description"], character)
-    else:
-        character = randomize_character(character, seed)
-
-    character["voice"]["voice_id"] = pick_auto_voice(character["params"]["gender"], character["params"]["age"], exclude=used_voices)
-    used_voices.append(character["voice"]["voice_id"])
-    return normalize_character(character)
-
-
-def build_cast(script_text: str, cast_file: dict, project_id: str) -> dict:
-    cast = {}
-    used_voices: list[str] = []
-    for position, speaker in enumerate(parse_script(script_text).speakers):
-        cast[speaker] = build_character(speaker, cast_file.get(speaker), position, project_id, used_voices)
-    return cast
+def register_given_director(direction_path: str) -> str:
+    """Registers a one-off director provider that plays back this direction file, and returns its provider name."""
+    direction_file = read_json_file(direction_path)
+    direction = direction_file["direction"] if "direction" in direction_file else direction_file
+    provider_name = f"given:{hash_of(direction)}"
+    DIRECTOR_PROVIDERS[provider_name] = lambda: GivenDirector(direction)
+    return provider_name
 
 
 def make_progress_printer():
@@ -89,9 +90,14 @@ def build_context(args: argparse.Namespace) -> PipelineContext:
     script_path = Path(args.script)
     script_text = script_path.read_text(encoding="utf-8")
     project_id = f"cli-{script_path.stem}"
+    cast, backgrounds = load_cast_and_backgrounds(args.cast)
 
     config = load_config()
     providers = dict(config.providers)
+    if args.director:
+        providers["director"] = args.director
+    if args.direction:
+        providers["director"] = register_given_director(args.direction)
     if args.tts:
         providers["tts"] = args.tts
     if args.lipsync:
@@ -103,7 +109,9 @@ def build_context(args: argparse.Namespace) -> PipelineContext:
         project_id=project_id,
         project_dir=PROJECTS_DIR / project_id,
         script=script_text,
-        cast=build_cast(script_text, read_cast_file(args.cast), project_id),
+        title=args.title or "",
+        cast=cast,
+        backgrounds=backgrounds,
         config=config,
         aspect=args.aspect,
         quality=args.quality,
@@ -120,7 +128,10 @@ def make_parser() -> argparse.ArgumentParser:
         command = commands.add_parser(name)
         command.add_argument("script")
         command.add_argument("--cast")
+        command.add_argument("--direction")
+        command.add_argument("--director", choices=["basic", "claude"])
         command.add_argument("--out")
+        command.add_argument("--title")
         command.add_argument("--aspect", choices=["16:9", "9:16"], default="16:9")
         command.add_argument("--quality", choices=["1080p", "720p"], default="1080p")
         command.add_argument("--no-music", action="store_true")

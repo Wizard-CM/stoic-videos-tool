@@ -1,0 +1,4 @@
+{
+  "JADE": {"character": "data/examples/characters/jade.json", "background": "data/examples/backgrounds/office.json"},
+  "RON": {"character": "data/examples/characters/ron.json", "background": "data/examples/backgrounds/night_city.json"}
+}

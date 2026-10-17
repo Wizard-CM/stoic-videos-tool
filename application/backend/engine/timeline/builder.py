@@ -100,7 +100,12 @@ def main_line_index(lines: list[dict], line_indexes: list[int], start: float, en
 
 
 def cutaway_frames(item: dict, cutaway: dict, lines: list[dict], fps: int) -> tuple[int, int] | None:
-    """(start frame, end frame) of the cutaway inside its parent shot, or None when it does not fit."""
+    """(start frame, end frame) of the cutaway inside its parent shot, or None when it does not fit.
+
+    A cutaway placed near the end of its shot may not leave room to cut back to the main subject; when that
+    happens it just rides to the shot's end instead (no sliver of the original subject, however short the cutaway
+    piece itself ends up being).
+    """
     start_frame, end_frame = item["start_frame"], item["end_frame"]
     if cutaway["line"] is not None:
         at_time = line_anchor_time(lines[cutaway["line"]], cutaway["at"])
@@ -108,10 +113,13 @@ def cutaway_frames(item: dict, cutaway: dict, lines: list[dict], fps: int) -> tu
         at_time = start_frame / fps + float(cutaway["at"])
     min_frames = frames_up(MIN_PIECE_S, fps)
     cut_start = max(round(at_time * fps), start_frame + min_frames)
+    if cut_start >= end_frame:
+        return None
     cut_end = round((at_time + cutaway["length"]) * fps)
-    if end_frame - cut_end < min_frames:
+    rides_to_the_end = end_frame - cut_end < min_frames
+    if rides_to_the_end:
         cut_end = end_frame
-    if cut_end - cut_start < min_frames:
+    elif cut_end - cut_start < min_frames:
         return None
     return cut_start, cut_end
 

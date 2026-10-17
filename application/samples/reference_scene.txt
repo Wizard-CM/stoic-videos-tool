@@ -1,0 +1,7 @@
+# Delegation: the 4-line scene ref-video.mp4 recreates, matching the hand-made example direction
+# (backend/data/examples/directions/reference_scene.json).
+
+JADE [angry, 0.7]: You signed off on this without telling me?
+RON [smug, 0.7]: It's called delegation, Jade.
+JADE [angry, 0.9]: It's called going behind my back!
+RON [smug, 0.8]: Potato, potahto.

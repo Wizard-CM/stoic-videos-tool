@@ -90,7 +90,6 @@ def test_cutaway_splits_the_shot_into_three_pieces():
     assert [shot["index"] for shot in timeline["shots"]] == list(range(len(timeline["shots"])))
 
 
-@pytest.mark.xfail(reason="unfinished pipeline work, see HANDOFF.md task 1", strict=False)
 def test_cutaway_near_the_end_does_not_cut_back():
     timeline = timeline_for({"shots": [{"lines": [0], "tail": 0.1, "cutaway": {"subject": "RON", "at": "end", "length": 3}}, {"lines": [1]},
                                        {"lines": [2]}]})
@@ -203,12 +202,13 @@ def test_pose_has_the_contract_shape(cast):
     assert -1.0 <= pose["breath"] <= 1.0
 
 
-@pytest.mark.xfail(reason="unfinished pipeline work, see HANDOFF.md task 1", strict=False)
 def test_blinks_use_half_and_closed_eyes(cast):
+    # JADE, not RON: RON's resting expression (smug) already uses the "half" eye state, which would make the
+    # first "half" frame in the track ambiguous between a blink and just resting.
     timeline = timeline_for({"shots": [{"lines": [0]}, {"lines": [1]}, {"lines": [2]}, {"beat": 8}]})
     frames = int(timeline["length_s"] * FPS)
 
-    eyes = [character_pose(timeline, cast, "RON", frame / FPS, -1.0)["eyes"] for frame in range(frames)]
+    eyes = [character_pose(timeline, cast, "JADE", frame / FPS, 1.0)["eyes"] for frame in range(frames)]
 
     assert "half" in eyes and "closed" in eyes
     first_blink = eyes.index("half")
@@ -227,7 +227,6 @@ def test_no_blink_on_eyes_without_whites(cast):
     assert eyes == {"happy"}
 
 
-@pytest.mark.xfail(reason="unfinished pipeline work, see HANDOFF.md task 1", strict=False)
 def test_gesture_moves_through_in_between_angles(cast):
     timeline = timeline_for({"shots": [{"lines": [0], "tail": 1.0}, {"lines": [1]}, {"lines": [2]}],
                              "events": [{"who": "JADE", "line": 0, "at": "word:1", "gesture": "point", "until": "line_end"}]})
@@ -238,7 +237,8 @@ def test_gesture_moves_through_in_between_angles(cast):
     returning = [character_pose(timeline, cast, "JADE", entry["end"] + frame / FPS, 1.0)["arms"]["right"] for frame in range(10)]
 
     assert abs(angles[0]) < 2.0
-    assert any(target * 0.2 < angle < target * 0.9 for angle in angles)  # passes through in-between angles
+    low, high = sorted((target * 0.2, target * 0.9))  # target is negative, so 20%/90% of it must be sorted first
+    assert any(low < angle < high for angle in angles)  # passes through in-between angles
     assert min(angles) < target  # a slight overshoot past the target (target is negative)
     assert angles[-1] == pytest.approx(target, abs=1.5)
     assert returning[-1]["hand"] == "rest" and abs(returning[-1]["shoulder"]) < 2.0
