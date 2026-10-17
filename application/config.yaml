@@ -4,13 +4,14 @@
 output_folder: ~/Videos/ToonForge
 
 # Pipeline stages, in order. Remove a stage here only if you know what it does.
-pipeline: [parse, cast, voice, lipsync, emotion, timeline, mix, render, encode]
+pipeline: [parse, cast, voice, lipsync, direct, timeline, mix, render, encode]
 
 # Plug-in providers, chosen by name.
 providers:
   tts: piper
   lipsync: rhubarb        # falls back to "amplitude" when the Rhubarb binary is missing
   music: procedural
+  director: claude        # "claude" plans shots and acting with Claude Code; "basic" is the offline rule-based fallback
 
 # Feature switches.
 features:
@@ -31,3 +32,19 @@ render:
 storyboard:
   frame_count: 16
   preview_seconds: 14
+
+# The Claude layer (Claude Code, run in the background through the Claude Agent SDK).
+# Opus leads every task: it plans, splits the work and hands simpler parts to the Sonnet and Haiku workers.
+# Sign-in: put an Anthropic API key in the environment variable named by api_key_env (recommended),
+# or sign the bundled Claude Code in once with `claude auth login`.
+claude:
+  lead_model: claude-opus-5-5
+  workers:
+    sonnet: claude-sonnet-5-5
+    haiku: claude-haiku-5-5
+  effort: high              # low | medium | high | xhigh | max
+  max_turns: 300            # per task
+  max_budget_usd: null      # no cap for now; set a number to stop a task that costs more
+  max_parallel_workers: 4
+  api_key_env: ANTHROPIC_API_KEY
+  cli_path: null            # null = the Claude Code CLI bundled with claude-agent-sdk

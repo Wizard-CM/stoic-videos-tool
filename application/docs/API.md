@@ -7,47 +7,50 @@ the built UI from `frontend/dist` at `/`.
 All bodies are JSON unless noted. Errors use FastAPI's shape: `{"detail": "message"}`
 with a 4xx status. The UI shows `detail` as-is.
 
+Characters, backgrounds and scripts are made by **Claude** (Claude Code running in the background on this PC).
+Making one starts a **Claude task**; the UI polls the task until it is done. Rendering a video also runs Claude once
+per script, in the job's `direct` stage, to plan shots and acting.
+
 ## Shared shapes
 
 ### Character
 
 ```json
 {
-  "id": "ron-3f9a1c",
-  "name": "Ron",
-  "description": "older man, silver hair, navy suit, red tie",
-  "params": {
-    "gender": "male",
-    "age": "elderly",
-    "head_width": 0.4, "jaw_width": 0.7, "chin_length": 0.5,
-    "eye_size": 0.3, "eye_spacing": 0.5, "nose_length": 0.7, "nose_width": 0.5,
-    "mouth_width": 0.5, "neck_width": 0.5, "shoulder_width": 0.6,
-    "face_shape": "oval",
-    "skin_tone": "#E2B08C", "wrinkles": 0.6, "blush": 0.0, "freckles": 0.0, "moles": 0.0,
-    "eye_shape": "almond", "iris_color": "#3E6FA8", "lash_style": "light",
-    "brow_thickness": 0.8, "brow_arch": 0.4, "brow_color": "#8C9099",
-    "hair_style": "swept_back", "hair_length": 0.4, "hair_volume": 0.5,
-    "hair_color": "#D9DCE1", "hair_highlight": 0.3,
-    "facial_hair": "none",
-    "glasses": "none", "earrings": false,
-    "outfit": "suit", "outfit_color": "#22325E", "shirt_color": "#FFFFFF",
-    "tie": true, "tie_color": "#A3262A"
-  },
-  "voice": { "voice_id": "norman", "auto": true, "pitch": -0.2, "speed": 0.0 },
-  "background": { "generator": "night_city", "seed": 4821 },
+  "id": "jade-1a2b3c",
+  "name": "Jade",
+  "description": "sharp project manager in her 30s, long black hair, green blouse, dark blazer, teal earrings",
+  "gender": "female",
+  "age": "adult",
+  "voice": { "voice_id": "amy", "auto": true, "pitch": 0.1, "speed": 0.0 },
+  "kit": { "format": "toonforge-kit/1", "...": "see docs/PUPPET_KIT.md" },
   "seed": 77123,
+  "made_by": { "task_id": "t-5d1e0a", "cost_usd": 1.84, "models": ["claude-opus-5-5", "claude-sonnet-5-5"] },
   "created_at": "2026-10-17T10:00:00Z",
   "updated_at": "2026-10-17T10:00:00Z"
 }
 ```
 
-- Slider params are floats `0..1` (the UI shows them as `0..100`).
-- `voice.pitch` and `voice.speed` are floats `-1..1` (`0` = the voice's natural value).
-- `voice.auto` is `true` until the user picks a voice by hand.
-- `id`, `created_at`, `updated_at` are set by the server. A character inside a project
-  (a snapshot) keeps the same shape.
-- Never hardcode param keys or option lists in the UI: build every control from
-  `GET /api/options` (below).
+- `gender`: `female`, `male`, `other`. `age`: `child`, `young`, `adult`, `middle`, `elderly`.
+- `voice.pitch` and `voice.speed` are floats `-1..1` (`0` = the voice's natural value). `voice.auto` is `true`
+  until the user picks a voice by hand.
+- `kit` is large. List endpoints return a **character summary** instead: the same object without `kit`, plus
+  `"expressions": [...]` and `"gestures": [...]` (names).
+
+### Background
+
+```json
+{
+  "id": "bg-office-7c2d11",
+  "name": "Green office",
+  "description": "paneled green wall, framed abstract art, warm desk lamp",
+  "art": { "format": "toonforge-background/1", "...": "see docs/PUPPET_KIT.md" },
+  "made_by": { "task_id": "t-81aa02", "cost_usd": 0.42, "models": ["claude-sonnet-5-5"] },
+  "created_at": "...", "updated_at": "..."
+}
+```
+
+List endpoints return it without `art`.
 
 ### Project
 
@@ -58,8 +61,10 @@ with a 4xx status. The UI shows `detail` as-is.
   "script": "JADE [angry]: You knew!\nRON [smug]: Of course.",
   "settings": { "aspect": "16:9", "music": true, "quality": "1080p" },
   "cast": {
-    "JADE": { "character": { "...Character..." : "" }, "library_id": "jade-1a2b3c" },
-    "RON":  { "character": { "...Character..." : "" }, "library_id": null }
+    "JADE": { "character": { "...Character...": "" }, "library_id": "jade-1a2b3c",
+              "background": { "...Background...": "" }, "background_library_id": "bg-office-7c2d11" },
+    "RON":  { "character": { "...Character...": "" }, "library_id": "ron-07246f",
+              "background": null, "background_library_id": null }
   },
   "status": "draft",
   "length_s": 132.4,
@@ -76,6 +81,8 @@ with a 4xx status. The UI shows `detail` as-is.
 - `estimated_length_s` comes from word count and is always present.
 - `output_url` / `output_path` are `null` until a render finishes.
 - `cast` only holds speakers that have a character assigned.
+- `cast[SPEAKER].background` is a snapshot. `null` means "Claude designs it for this video": after the first
+  storyboard or render it holds the designed one (`background_library_id` stays `null`, its `id` is `null`).
 
 ### Project list item
 
@@ -90,42 +97,62 @@ with a 4xx status. The UI shows `detail` as-is.
 
 `progress` is a number only while a job is running, otherwise `null`.
 
-## Options (drives the character builder and settings)
+### Claude task
+
+```json
+{
+  "id": "t-5d1e0a",
+  "kind": "character",
+  "state": "running",
+  "title": "Designing Jade",
+  "message": "Sonnet worker is drawing the mouths",
+  "activity": [
+    { "t": "2026-10-17T10:00:03Z", "who": "lead", "kind": "note", "text": "Planning: base design first, then parts in parallel" },
+    { "t": "2026-10-17T10:01:10Z", "who": "lead", "kind": "delegate", "text": "sonnet-worker: draw the 9 neutral mouths" },
+    { "t": "2026-10-17T10:02:40Z", "who": "sonnet-worker", "kind": "tool", "text": "Checked the kit: 2 errors" }
+  ],
+  "result": null,
+  "error": null,
+  "cost_usd": 0.73,
+  "started_at": "...", "updated_at": "..."
+}
+```
+
+- `kind`: `character`, `character_revision`, `background`, `background_revision`, `script`.
+- `state`: `queued`, `running`, `done`, `failed`, `cancelled`. Poll every 2 s while `queued` or `running`.
+- `activity` holds the newest 60 entries, oldest first. `who` is `lead` (Opus) or a worker name.
+- `result` when `done`: `{ "character_id" }`, `{ "background_id" }`, or `{ "title", "script" }`.
+
+## Options
 
 `GET /api/options`
 
 ```json
 {
-  "controls": [
-    { "key": "gender", "label": "Gender", "section": "Identity", "type": "select",
-      "options": [ { "value": "male", "label": "Male" }, { "value": "female", "label": "Female" } ] },
-    { "key": "head_width", "label": "Head width", "section": "Proportions", "type": "slider",
-      "low": "Narrow", "high": "Wide" },
-    { "key": "hair_style", "label": "Hair style", "section": "Hair", "type": "select",
-      "options_by_gender": { "male": [ { "value": "short_crop", "label": "Short crop" } ],
-                             "female": [ { "value": "long_straight", "label": "Long straight" } ] } },
-    { "key": "hair_color", "label": "Hair color", "section": "Hair", "type": "color",
-      "swatches": [ { "value": "#1E1A22", "label": "Black" } ] },
-    { "key": "tie", "label": "Tie", "section": "Extras", "type": "toggle" }
-  ],
-  "sections": ["Identity", "Proportions", "Face", "Eyes and brows", "Hair", "Extras"],
   "emotions": [ { "value": "neutral", "label": "Neutral" } ],
-  "backgrounds": [ { "value": "office", "label": "Office" }, { "value": "night_city", "label": "Night city" } ],
+  "gestures": [ { "value": "point", "label": "Point" } ],
   "voices": [ { "id": "ryan", "label": "Ryan, male, adult", "gender": "male", "age": "adult" } ],
+  "genders": [ { "value": "female", "label": "Female" } ],
+  "ages": [ { "value": "adult", "label": "Adult" } ],
   "aspects": [ { "value": "16:9", "label": "16:9 desktop" }, { "value": "9:16", "label": "9:16 mobile" } ],
   "qualities": [ { "value": "1080p", "label": "1080p (best)" }, { "value": "720p", "label": "720p (faster render)" } ],
+  "script_lengths": [ { "value": "short", "label": "Short (about 30 s)" } ],
   "max_length_s": 900
 }
 ```
 
-Control `type` is one of:
+## Claude
 
-| type | value in `params` | UI |
+| Method & path | Body | Returns |
 | --- | --- | --- |
-| `slider` | float 0..1 | range input 0..100, `low` / `high` words shown as the hint for the current half |
-| `select` | string | `<select>`; use `options`, or `options_by_gender[params.gender]` |
-| `color` | `#RRGGBB` | swatch buttons from `swatches` plus an `<input type="color">` |
-| `toggle` | boolean | checkbox |
+| `GET /api/claude/status` | — | `{ "ready": bool, "message": string, "cli": string \| null, "auth": string, "models": { "lead": string, "workers": { "sonnet": string, "haiku": string } } }` |
+| `POST /api/claude/test` | — | `{ "ok": bool, "message": string }` — a tiny real request (Haiku) to prove sign-in works |
+| `GET /api/claude/tasks` | — | `ClaudeTask[]` running or finished in the last hour, newest first |
+| `GET /api/claude/tasks/{task_id}` | — | `ClaudeTask` |
+| `POST /api/claude/tasks/{task_id}/cancel` | — | `ClaudeTask` |
+
+`ready` is `false` (with a plain `message` saying what to do) when the Claude Code CLI is missing or nobody is
+signed in. Starting a task while not ready returns `409` with that message.
 
 ## Script
 
@@ -144,8 +171,11 @@ Control `type` is one of:
 }
 ```
 
-`issues[].level` is `error` or `warning`. `line_no` may be `null` for script-wide issues
-(e.g. "Use 2 to 6 speakers").
+`POST /api/projects/{id}/script/generate` — body
+`{ "idea": "two coworkers argue about a missing report", "length": "short" | "medium" | "long", "use_library": true }`
+→ `{ "task_id": "t-..." }` (202). When the task is done its `result` is `{ "title", "script" }`; the UI shows it
+and saves it with `PUT /api/projects/{id}` when the user accepts. With `use_library`, Claude may cast characters that
+already exist in the library (it sees their names and descriptions).
 
 ## Projects
 
@@ -158,36 +188,45 @@ Control `type` is one of:
 | `POST /api/projects/{id}/duplicate` | — | `Project` (201) |
 | `DELETE /api/projects/{id}` | — | `{ "ok": true }` |
 | `GET /api/projects/{id}/thumbnail.png` | — | PNG (404 when the project has no cast yet) |
-| `PUT /api/projects/{id}/cast/{speaker}` | `{ "character": Character, "library_id": string \| null }` | `Project` |
+| `PUT /api/projects/{id}/cast/{speaker}` | `{ "library_id": string }` | `Project` (the library character is snapshotted) |
 | `DELETE /api/projects/{id}/cast/{speaker}` | — | `Project` |
+| `PUT /api/projects/{id}/cast/{speaker}/background` | `{ "library_id": string \| null }` | `Project` (`null` = Claude designs one for this video) |
 
-`speaker` is the upper-case name from the script.
+`speaker` is the upper-case name from the script. Setting a cast member keeps that speaker's background choice.
 
 ## Characters (library)
 
 | Method & path | Body | Returns |
 | --- | --- | --- |
-| `GET /api/characters` | — | `Character[]` sorted by name |
-| `POST /api/characters` | `Character` (no id needed) | `Character` (201) |
+| `GET /api/characters` | — | character summaries sorted by name |
 | `GET /api/characters/{id}` | — | `Character` |
-| `PUT /api/characters/{id}` | `Character` | `Character` |
+| `POST /api/characters/generate` | `{ "name": string, "description": string, "gender"?: string, "age"?: string }` | `{ "task_id" }` (202); the finished task's result is `{ "character_id" }` |
+| `POST /api/characters/{id}/revise` | `{ "feedback": string }` | `{ "task_id" }` (202); Claude edits the kit and saves the same character |
+| `PUT /api/characters/{id}` | any of `{ name, description, gender, age, voice }` | `Character` |
 | `DELETE /api/characters/{id}` | — | `{ "ok": true }` |
 | `POST /api/characters/import` | a Character JSON (as read from a shared file) | `Character` (201, new id if taken) |
 | `GET /api/characters/{id}/export` | — | the JSON file as a download |
-| `GET /api/characters/{id}/avatar.png?size=96` | — | PNG head-and-shoulders, neutral |
-| `POST /api/characters/new` | `{ "name"?: string, "gender"?: "male" \| "female" }` | an unsaved default `Character` |
-| `POST /api/characters/autofill` | `{ "description": string, "character": Character }` | `{ "character": Character, "matched": string[], "unmatched": string[] }` |
-| `POST /api/characters/randomize` | `{ "character": Character }` | `{ "character": Character }` (keeps name, gender, age, voice) |
-| `POST /api/characters/auto-voice` | `{ "gender": string, "age": string, "exclude": string[] }` | `{ "voice_id": string }` |
-| `POST /api/characters/preview` | `{ "character": Character, "emotion": string, "width"?: 400, "height"?: 500 }` | PNG — the engine's real renderer |
-| `POST /api/voices/sample` | `{ "voice": Voice, "text"?: string }` | `audio/wav` |
+| `GET /api/characters/{id}/preview.png?expression=neutral&gesture=rest&width=400&height=500&crop=bust` | — | PNG from the engine's real renderer |
+| `GET /api/characters/{id}/sheet.png?sheet=expressions` | — | PNG contact sheet: `expressions`, `mouths`, `eyes`, `gestures`, `hands` |
+| `GET /api/characters/{id}/avatar.png?size=96` | — | PNG head, neutral |
+| `POST /api/voices/sample` | `{ "voice": Voice, "age"?: string, "text"?: string }` | `audio/wav` |
 
-The live preview should re-request `POST /api/characters/preview` (debounced ~150 ms)
-whenever the character or emotion changes and show the returned blob as an `<img>`.
+## Backgrounds (library)
+
+| Method & path | Body | Returns |
+| --- | --- | --- |
+| `GET /api/backgrounds` | — | background summaries sorted by name |
+| `GET /api/backgrounds/{id}` | — | `Background` |
+| `POST /api/backgrounds/generate` | `{ "name": string, "description": string, "character_id"?: string }` | `{ "task_id" }` (202); result `{ "background_id" }` |
+| `POST /api/backgrounds/{id}/revise` | `{ "feedback": string }` | `{ "task_id" }` (202) |
+| `PUT /api/backgrounds/{id}` | any of `{ name, description }` | `Background` |
+| `DELETE /api/backgrounds/{id}` | — | `{ "ok": true }` |
+| `GET /api/backgrounds/{id}/preview.png?width=640&character_id=` | — | PNG; with `character_id` the character is drawn in the set |
 
 ## Jobs (storyboard and render)
 
-Only one job runs at a time on the PC. Starting a second one returns `409`.
+Only one job runs at a time on the PC. Starting a second one returns `409`. Claude tasks (above) are separate and
+can run alongside a job.
 
 | Method & path | Returns |
 | --- | --- |
@@ -200,6 +239,9 @@ Only one job runs at a time on the PC. Starting a second one returns `409`.
 | `GET /api/projects/{id}/output.mp4` | the final video (`?download=1` sends it as an attachment) |
 | `GET /api/projects/{id}/files/{path}` | storyboard frames, preview clip, latest render frame |
 
+Preflight checks: cast complete, length ≤ 15:00, free disk space, and Claude ready (only when the video's direction
+is not cached yet).
+
 ### Job
 
 ```json
@@ -211,6 +253,7 @@ Only one job runs at a time on the PC. Starting a second one returns `409`.
   "message": "Drawing frames, part 9 of 14",
   "stages": [
     { "key": "parse", "label": "Check script", "state": "done", "note": "Passed" },
+    { "key": "direct", "label": "Direct the video (Claude)", "state": "done", "note": "14 shots" },
     { "key": "render", "label": "Draw frames", "state": "active", "note": "Part 9 of 14" },
     { "key": "encode", "label": "Join and save MP4", "state": "waiting", "note": "" }
   ],
@@ -224,7 +267,8 @@ Only one job runs at a time on the PC. Starting a second one returns `409`.
 
 - `state`: `queued`, `running`, `done`, `failed`, `cancelled`, `stopped`
   (`stopped` = the worker died, e.g. PC restarted; rendering again resumes).
-- `stages[].state`: `done`, `active`, `waiting`, `skipped`.
+- `stages[].state`: `done`, `active`, `waiting`, `skipped`. While `direct` is active its `note` shows Claude's latest
+  activity line.
 - `eta_s`, `chunk`, `latest_frame_url`, `latest_frame_caption` may be `null`.
 
 ### Storyboard
@@ -233,13 +277,13 @@ Only one job runs at a time on the PC. Starting a second one returns `409`.
 {
   "length_s": 132.4,
   "shot_count": 24,
-  "cutaway_count": 5,
-  "longest_pause_s": 0.4,
-  "frames": [ { "t": 0.0, "t_label": "0:00", "shot_label": "Medium close-up",
+  "reaction_count": 5,
+  "frames": [ { "t": 0.0, "t_label": "0:00", "shot_label": "Jade, medium close-up",
                 "caption": "JADE: You knew about the missing report…",
                 "url": "/api/projects/p-8c21de/files/storyboard/frame_00.jpg?v=3" } ],
   "preview_url": "/api/projects/p-8c21de/files/storyboard/preview.mp4?v=3",
   "preview_length_s": 14.2,
+  "director_notes": "One line per shot; Jade escalates; final silent glare.",
   "aspect": "16:9"
 }
 ```

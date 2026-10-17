@@ -1,197 +1,221 @@
 # Engine contracts
 
-Every engine module follows these signatures, so the modules can be built in parallel and still fit together.
-If you need to change one of these, say so in your final report instead of quietly changing it.
+ToonForge has three layers:
 
-The backend root is `application/backend/`. Run Python with `.venv/bin/python` from there; imports start at `engine.` or `app.`.
-`docs/API.md` is the separate contract between the UI and the backend.
+1. **Claude layer** (`backend/claude_layer/`): Claude Code, run headless through the Claude Agent SDK, designs every
+   character, background and script, and directs every video. Opus 5.5 leads and plans; it splits work into smaller
+   tasks and hands them to Sonnet or Haiku workers by complexity.
+2. **Engine** (`backend/engine/`): deterministic and AI-free. It voices the lines, matches mouths, turns Claude's
+   direction into a frame-exact timeline and draws Claude's vector art into an MP4.
+3. **App** (`backend/app/` + `frontend/`): the local web UI, projects, libraries, jobs.
+
+Every module follows the signatures below so the layers can be built in parallel and still fit together. If you need
+to change one, say so in your final report instead of quietly changing it. Formats: `docs/PUPPET_KIT.md` (character kit
+and background art) and `docs/DIRECTION.md` (brief and direction). HTTP: `docs/API.md`.
+
+The backend root is `application/backend/`. Imports start at `engine.`, `claude_layer.` or `app.`.
 
 ## House style (all Python)
 
-- Plain, boring, readable code. Plain names (`draw_eyes`, `pause_after_line`). No clever abstractions, no classes when a
-  function will do. Use type hints on public functions. Keep docstrings to one line unless something is non-obvious.
-- Match the existing files: `engine/character/params.py`, `rig/controls.py`, `rig/layout.py`, `shapes.py`, `colors.py`.
-- Every random choice is seeded (`random.Random(seed)`). The same inputs must give exactly the same output.
-- The engine never imports `app`. Settings come from `engine.config.load_config()`, and YAML data comes from `load_data_file(name)`.
+- Plain, boring, readable code. Plain names (`draw_eyes`, `place_shots`). Functions over classes unless state is
+  real. Type hints on public functions. Docstrings one line unless something is non-obvious.
+- Every random choice is seeded (`random.Random(seed)`). The same inputs give exactly the same output.
+- `engine` never imports `app`. The only place `engine` touches `claude_layer` is the lazy import of the `claude`
+  director provider in `engine/direction/providers.py`. `claude_layer` may import `engine`, never `app`.
 - Errors the user should see: `engine.errors.PipelineError("plain sentence")`. Cancel: `engine.errors.Cancelled`.
-- Lint with `.venv/bin/ruff check <your files>` (config in `backend/pyproject.toml`, line length 150).
+- Lint: `ruff check .` (config in `backend/pyproject.toml`, line length 150). Tests: `pytest -q`.
 
-## Already built (reuse, don't rewrite)
+## Kept from before (reuse, don't rewrite)
 
 | Module | What you get |
 |---|---|
-| `engine/config.py` | `load_config() -> EngineConfig`, `load_data_file(name)`, `find_tool(name)`, `ffmpeg_path()`, `piper_voices_dir()`, `APP_ROOT`, `VENDOR_DIR` |
+| `engine/config.py` | `load_config() -> EngineConfig` (now with `.claude` settings), `load_data_file(name)`, `find_tool`, `ffmpeg_path()`, `piper_voices_dir()`, `APP_ROOT`, `DATA_DIR`, `EXAMPLES_DIR` |
 | `engine/errors.py` | `PipelineError`, `Cancelled` |
-| `engine/script/parser.py` | `parse_script(text) -> ParsedScript` (`.lines: list[ScriptLine]`, `.speakers` in order of first appearance, `.errors`, `.warnings`). `ScriptLine(line_no, speaker, emotion or None, intensity or None, text, tagged)` |
-| `engine/character/params.py` | `new_character`, `normalize_character`, `randomize_character`, `pick_auto_voice`, `builder_controls`, `DEFAULT_PARAMS` |
-| `engine/character/keywords.py` | `autofill_character(description, character)` |
-| `engine/character/rig/controls.py` | `RIG_CONTROLS` (20), `MOUTH_KEYS`, `VISEMES` (X, A–H), `neutral_rig()`, `emotion_rig(emotion, intensity)`, `emotion_delivery(emotion, intensity) -> {speed, pitch, volume}`, `listener_reaction(emotion, intensity) -> (emotion, intensity)`, `blend_rigs`, `blend_mouths` |
-| `engine/character/rig/layout.py` | `compute_layout(params, pose) -> FaceLayout` (face geometry in character space) |
-| `engine/character/shapes.py` | `mirrored_outline`, `polygon`, `smooth_closed`, `smooth_open`, `cubic_point`, `tapered_stroke`, `lerp`, `lerp_point`, `clamp` |
-| `engine/character/colors.py` | `hex_to_rgb`, `rgb_to_hex`, `shade(hex, amount)`, `mix`, `skia_color`, `fill_paint`, `stroke_paint` |
-| `engine/character/pose.py` | `neutral_pose()` |
-| `engine/pipeline/context.py` | `PipelineContext`, `frame_size(aspect, quality)`, `project_seed(project_id)` |
-| `backend/data/*.yaml` | `emotions.yaml` (presets, aliases, rules for untagged lines), `voices.yaml`, `keywords.yaml` |
+| `engine/emotions.py` | `emotion_names()`, `emotion_choices()`, `emotion_delivery(emotion, intensity) -> {speed, pitch, volume}`, `line_emotion(script_line) -> (emotion, intensity)` |
+| `engine/script/parser.py` | `parse_script(text) -> ParsedScript` (`.lines`, `.speakers`, `.errors`, `.warnings`) |
+| `engine/tts/` | `get_tts_provider(name)`, `voice_settings(character, emotion, intensity)` (reads `character["age"]` and `character["voice"]`) |
+| `engine/lipsync/` | `get_lipsync_provider(name).analyze(wav, text) -> [(start, end, shape)]`, shapes `X A B C D E F G H` |
+| `engine/audio/` | `loudness_envelope(wav, fps)`, `mix_audio(...)`, music providers |
+| `engine/encode/ffmpeg.py`, `engine/render/chunks.py`, `engine/pipeline/{cache,context,runner,stage}.py` | as before; `render_chunks` and `draw_frame` gain a `backgrounds` argument |
 
 ## Shared data shapes
 
-**Character**: the dict from `normalize_character` (`id, name, description, params{...}, voice{voice_id, auto, pitch -1..1,
-speed -1..1}, background{generator, seed}, seed, ...`). **Cast**: `dict[SPEAKER, character]`. Speaker order = `ParsedScript.speakers`.
-The **slot** of a speaker is its index in that list.
-
-**Pose** (input to the painter, one per character per frame):
+**Character record** (library file, project snapshot, pipeline input):
 ```python
 {
-  # the 20 RIG_CONTROLS, floats, ranges as documented at the top of data/emotions.yaml
-  "brow_inner_raise": 0.0, ..., "head_tilt": 0.0, "head_turn": 0.0, "head_nod": 0.0,
-  "mouth": {"open", "width", "round", "teeth_upper", "teeth_lower", "tongue", "lip_in"},  # lip-sync shape, see VISEMES
-  "blink": 0.0,   # 0 open .. 1 closed (added on top of lid_upper)
-  "breath": 0.0,  # -1..1, chest/shoulder rise
+  "id": "jade-1a2b3c" | None, "name": "Jade", "description": "free text from the user",
+  "gender": "female" | "male" | "other", "age": "child" | "young" | "adult" | "middle" | "elderly",
+  "voice": {"voice_id": "amy", "auto": True, "pitch": 0.0, "speed": 0.0},   # pitch/speed -1..1
+  "kit": {...},          # puppet kit, docs/PUPPET_KIT.md
+  "seed": 12345,         # life motion (blinks, idle) seed
+  "made_by": {"task_id": "...", "cost_usd": 1.23, "models": ["claude-opus-5-5", ...]} | None,
+  "created_at": "...", "updated_at": "...",
 }
 ```
-The painter combines `pose["mouth"]` (lip sync) with the emotion controls: `mouth_open` adds to the opening, and
-`mouth_corner`, `mouth_stretch`, `mouth_press`, `mouth_asym` bend the lips. `head_turn` −1..1 (+ = turns to the
-character's left, i.e. screen right), `head_nod` + = chin down, `head_tilt` + = clockwise on screen.
 
-**Character space**: face center (0, 0), +y down, skull top y ≈ −128, chin ≈ +118, shoulders around y ≈ +250, body
-continues down to y ≈ +900. One unit ≈ one pixel at camera scale 1.0.
+**Background record**: `{"id", "name", "description", "art": {...background art...}, "made_by", "created_at", "updated_at"}`.
 
-**Timeline** (a JSON-serializable dict, saved to `work/timeline.json`):
+**Cast** (pipeline): `dict[SPEAKER, character record]`. **Backgrounds** (pipeline): `dict[SPEAKER, art dict or None]`
+(`None` = the director designs one). Speaker order = `ParsedScript.speakers`.
+
+**Pose** (one per character per frame; `engine/timeline/evaluate.py` makes it, `engine/puppet/draw.py` draws it):
 ```python
 {
-  "fps": 24, "length_s": 132.4, "seed": 123, "aspect": "16:9",
-  "speakers": ["JADE", "RON"],
-  "lines": [{
-      "index": 0, "speaker": "JADE", "text": "...", "start": 0.3, "end": 3.1,   # seconds, absolute
-      "emotion": "angry", "intensity": 0.7, "brow_raise": 0.0,                  # brow_raise from "?" rule
-      "wav": "/abs/path/line.wav",
-      "cues": [[0.0, 0.12, "X"], [0.12, 0.3, "B"], ...],                      # seconds RELATIVE to line start
-      "envelope": [0.0, 0.31, ...],                                             # loudness 0..1, one value per frame (fps) from line start
-  }],
-  "shots": [{
-      "start": 0.0, "end": 4.2, "size": "MCU",      # MCU | CU | ECU
-      "subject": "JADE", "kind": "speaker",         # speaker | cutaway (cutaway = subject is the listener)
-      "line_index": 0,                              # line playing during most of the shot
-      "move": "push_in",                            # push_in | drift | static
-      "punch_ins": [2.1],                           # absolute times of quick punch-ins (high-intensity words)
-  }],
+  "eyes": "open",                         # eye state name (blinks already applied: half/closed)
+  "gaze": [0.0, 0.0],                     # -1..1, x + = screen right, y + = down
+  "brows": {"raise": 0.0, "angle": 0.0, "state": None},   # units (+ up), degrees (+ inner ends down), optional state
+  "mouth": "neutral_X",                   # an existing key of kit["mouths"] (already resolved with fallbacks)
+  "decals": ["stress_marks"],
+  "head": {"tilt": 0.0, "nod": 0.0, "turn": 0.0, "lean": 0.0},  # degrees, units (+ chin down), -1..1, scale offset (0.03 = 3% bigger)
+  "arms": {"left": {"shoulder": 0.0, "elbow": 0.0, "hand": "rest", "hide_hand": False, "behind": False},
+           "right": {...}},
+  "breath": 0.0,                          # -1..1
 }
 ```
-Rules: shots cover 0..length_s with no gaps. No shot is longer than 8 s. Pauses between lines are seeded 0.25–0.4 s,
-and no silence is longer than 0.6 s. Only one character is on screen at a time (close-ups only, PRD §7).
+
+**Timeline** (`work/timeline.json`; all times are absolute seconds):
+```python
+{
+  "fps": 24, "length_s": 17.0, "seed": 123, "aspect": "16:9", "speakers": ["JADE", "RON"],
+  "lines": [{"index": 0, "speaker": "JADE", "text": "...", "start": 1.1, "end": 3.3,
+             "emotion": "angry", "intensity": 0.8, "wav": "/abs/line.wav",
+             "cues": [[0.0, 0.12, "X"], ...],            # seconds RELATIVE to the line start
+             "envelope": [0.0, 0.31, ...],               # loudness 0..1 per frame from the line start
+             "words": [{"word": "You", "start": 1.1, "end": 1.28}, ...]}],   # absolute
+  "shots": [{"index": 0, "start": 0.0, "end": 3.96, "subject": "JADE", "size": "MCU", "push": 0.05, "drift": 6.0,
+             "kind": "dialogue" | "reaction" | "beat" | "cutaway", "line_index": 0 | None, "label": "Jade, medium close-up"}],
+  "tracks": {"JADE": {
+      "expressions": [{"t": 0.0, "name": "angry", "intensity": 0.6}, ...],   # sorted; holds until the next
+      "gestures": [{"t": 8.9, "end": 10.58, "name": "point"}, ...],          # sorted, non-overlapping; rest outside
+      "gaze": [{"t": 5.6, "end": 7.0, "x": 0.6, "y": 0.1}, ...],
+      "head": [{"t": 5.7, "move": "tilt_left"}, ...]}},
+}
+```
+Shots cover `0..length_s` with no gaps, in order, cut times snapped to frames.
 
 ## Module signatures
 
-### Character painter: `engine/character/` (A1)
+### Vector art: `engine/vector/` (owner: renderer)
 ```python
+# paths.py
+def parse_path(d: str) -> skia.Path          # cached per string; raises ValueError("Bad path data at ...")
+# shapes.py
+def check_shapes(shapes, palette: dict, where: str, errors: list[str], allow_gradients: bool = False) -> None
+def draw_shapes(canvas: skia.Canvas, shapes: list, palette: dict, style: dict | None = None) -> None
+def resolve_color(value: str, palette: dict) -> int                    # skia color; raises ValueError
+```
+
+### Puppet: `engine/puppet/` (owner: renderer)
+```python
+# kit.py
+REQUIRED_EXPRESSIONS, REQUIRED_MOUTHS, REQUIRED_EYE_STATES, LIPSYNC_SHAPES, MOODS, RECOMMENDED_GESTURES
+class KitError(ValueError)
+def check_kit(kit: dict) -> tuple[list[str], list[str]]                # (errors, warnings), readable sentences
+def validate_kit(kit: dict) -> dict                                    # raises KitError listing every error
+def get_expression(kit: dict, name: str, intensity: float) -> dict     # resolved fields per PUPPET_KIT.md (falls back to neutral)
+def get_gesture(kit: dict, name: str) -> dict                          # {"left": {...}, "right": {...}} with defaults (falls back to rest)
+def resolve_mouth(kit: dict, mood: str, shape: str) -> str             # existing mouth key, with the documented fallbacks
+def kit_summary(kit: dict) -> dict                                     # {"expressions", "gestures", "eye_states", "mouths", "decals"}
+def head_height(kit: dict) -> float                                    # chin y - head_top y
+# character.py
+GENDERS, AGES
+def make_character_id(name: str) -> str
+def normalize_character(character: dict) -> dict                       # fills defaults, validates the kit (KitError)
+def static_pose(kit, expression="neutral", intensity=0.8, gesture="rest", mouth=None, eyes=None, gaze=None) -> dict
 # draw.py
-def draw_character(canvas: skia.Canvas, character: dict, pose: dict) -> None   # character space; the caller sets the transform
-# parts/hair.py
-def style_choices(gender: str) -> list[tuple[str, str]]
-def draw_hair_back(canvas, params, layout) -> None
-def draw_hair_front(canvas, params, layout) -> None
-# parts/facial_hair.py, parts/glasses.py, parts/outfits.py
-def style_choices() -> list[tuple[str, str]]
-def draw_facial_hair(canvas, params, layout, pose) -> None
-def draw_glasses(canvas, params, layout) -> None
-def draw_outfit(canvas, params, layout, pose) -> None
-# engine/render/preview.py
-def render_character_png(character: dict, pose: dict, width: int, height: int, crop: str = "bust", background: bool = True) -> bytes
-#   crop "bust" = head and shoulders (builder preview), "head" = face only (96 px avatars)
+def draw_character(canvas: skia.Canvas, kit: dict, pose: dict) -> None # kit canvas coordinates; caller sets the transform
+# preview.py
+def render_character_png(kit: dict, pose: dict, width: int, height: int, crop: str = "bust", background: bool = True) -> bytes
+#   crop: "full" (whole 1000x1000 canvas), "bust" (head to mid-chest), "head" (face, for avatars)
+def render_kit_sheet(kit: dict, sheet: str, cell: int = 240) -> bytes  # sheet: expressions | mouths | eyes | gestures | hands
 ```
-`params.py` already calls `hair.style_choices(gender)`, `facial_hair.style_choices()`, `glasses.style_choices()`, `outfits.style_choices()`.
-The keys used in `params.DEFAULT_PARAMS` / `FEMALE_OVERRIDES` must exist (`short_crop`, `bob`, `suit`, `blazer`, `none`, ...).
 
-### Scene: `engine/scene/` (A2)
+### Backgrounds: `engine/scene/backgrounds.py` (owner: renderer)
 ```python
-# backgrounds.py
-def background_choices() -> list[tuple[str, str]]       # [("office", "Office"), ("night_city", "Night city")]
-def render_background(generator: str, seed: int, width: int, height: int, blur: float = 6.0) -> skia.Image   # cached in memory
-# framing.py
-def camera_at(shot: dict, slot: int, aspect: str, width: int, height: int, t: float) -> tuple[float, float, float]
-#   returns (scale, x, y): screen point = (x + scale * cx, y + scale * cy) for a character-space point (cx, cy)
-def shot_label(size: str) -> str                        # "Medium close-up", "Close-up", "Extreme close-up"
-def blur_for_size(size: str) -> float                   # background depth blur per shot size
+def check_background(art: dict) -> tuple[list[str], list[str]]
+def validate_background(art: dict) -> dict                             # raises ValueError listing every error
+def default_background() -> dict                                       # calm plain set, used when nothing else is given
+def subject_screen_x(art: dict, width: int, height: int) -> float      # where the face goes on screen
+def render_back(art: dict, width: int, height: int) -> skia.Image      # cover-cropped to the frame, blurred; cached
+def render_foreground(art: dict, width: int, height: int) -> skia.Image | None   # blurred overlay; cached
+def draw_desk(canvas: skia.Canvas, art: dict, desk_top_y: float, width: int, height: int) -> None   # screen space
+def draw_light(canvas: skia.Canvas, art: dict, width: int, height: int) -> None   # glow + vignette, screen space
+def render_background_png(art: dict, width: int, height: int, kit: dict | None = None) -> bytes  # preview (with a character if given)
 ```
 
-### Voice, lip sync, audio: `engine/tts/`, `engine/lipsync/`, `engine/audio/` (A3)
+### Direction: `engine/direction/` (owner: pipeline)
 ```python
-# tts/base.py
-class TTSProvider:
-    def synthesize(self, text: str, voice_id: str, speed: float, pitch_semitones: float, volume_db: float, out_wav: Path) -> float  # returns duration_s
-def get_tts_provider(name: str) -> TTSProvider          # "piper", "fake"
-def voice_settings(character: dict, emotion: str, intensity: float) -> dict   # {voice_id, speed, pitch_semitones, volume_db}
-#   character voice pitch -1..1 -> ±pitch_range_semitones, + voices.yaml age_pitch, + emotion_delivery; speed -1..1 -> speed_range
-# lipsync/base.py
-class LipSyncProvider:
-    def analyze(self, wav_path: Path, text: str) -> list[tuple[float, float, str]]   # (start_s, end_s, shape in VISEMES)
-def get_lipsync_provider(name: str) -> LipSyncProvider  # "rhubarb" (falls back to "amplitude" when the binary is missing), "amplitude"
-# audio/wavio.py
-def read_wav(path) -> tuple[numpy.ndarray, int]          # float32 mono -1..1, sample_rate
-def write_wav(path, samples, sample_rate=48000) -> None  # 16-bit PCM; 2-D array = stereo
-# audio/envelope.py
-def loudness_envelope(wav_path, fps: int) -> list[float]  # 0..1 per frame
-# audio/mixer.py
-def mix_audio(timeline: dict, music: bool, music_provider: str, seed: int, out_wav: Path, should_cancel=lambda: False) -> Path
-#   48 kHz stereo, 10 ms micro-fades, music ducked under speech, two-pass loudnorm to -14 LUFS
-# audio/music.py
-def get_music_provider(name: str)                       # "procedural": .generate(length_s, seed, out_wav) -> Path
+# words.py
+def estimate_words(text: str, envelope: list[float], fps: int, duration: float) -> list[dict]   # relative times
+# brief.py
+def make_brief(title, aspect, fps, lines: list[dict], cast: dict, backgrounds: dict) -> dict     # docs/DIRECTION.md
+#   lines: [{"index", "speaker", "text", "emotion", "intensity", "duration", "words"}]
+# validate.py
+class DirectionError(ValueError)
+def check_direction(direction: dict, brief: dict) -> tuple[list[str], list[str]]
+def normalize_direction(direction: dict, brief: dict) -> dict          # defaults + clamps; raises DirectionError
+# basic.py
+def basic_direction(brief: dict) -> dict                               # rule-based offline fallback, always valid
+# providers.py
+class DirectorProvider:
+    def direct(self, brief: dict, workspace: Path, report: Callable[[float, str], None], should_cancel: Callable[[], bool]) -> dict
+    #   returns {"direction": {...}, "backgrounds": {SPEAKER: art}, "notes": str, "cost_usd": float | None}
+DIRECTOR_PROVIDERS: dict[str, type[DirectorProvider]]                  # "basic" built in; "claude" from claude_layer.director
+def get_director_provider(name: str) -> DirectorProvider
 ```
-Line WAVs are 48 kHz mono 16-bit, edges trimmed, inner silences capped at 0.4 s.
 
-### Expression and timeline: `engine/expression/`, `engine/timeline/` (A4)
+### Timeline: `engine/timeline/` (owner: pipeline)
 ```python
-# expression/resolver.py
-def resolve_emotions(lines: list[ScriptLine]) -> list[dict]   # [{emotion, intensity, brow_raise}] per line (tags, else rules, else previous)
-# timeline/builder.py
-def build_timeline(line_inputs: list[dict], speakers: list[str], aspect: str, fps: int, seed: int) -> dict
-#   line_inputs[i] = {index, speaker, text, emotion, intensity, brow_raise, duration, wav, cues, envelope}
-# timeline/evaluate.py
-def frame_state(timeline: dict, cast: dict, t: float) -> dict
-#   {"shot": shot, "subject": speaker, "slot": int, "pose": pose}
-#   A pure function of t (no state between calls), so storyboard stills match the final video frame for frame.
-#   Includes: emotion blends over 8 frames, mouth from cues, blinks/darts/breathing/sway (life layer, seeded by
-#   character["seed"]), loudness emphasis, listener reactions on cutaways, and base head_turn so the two sides face
-#   each other in 16:9.
+# builder.py
+def build_timeline(brief: dict, direction: dict, line_media: list[dict], fps: int, seed: int) -> dict
+#   line_media[i] = {"wav", "cues", "envelope"}; direction already normalized
+# evaluate.py
+def character_pose(timeline: dict, cast: dict, speaker: str, t: float, slot_side: float) -> dict
+def frame_state(timeline: dict, cast: dict, t: float) -> dict          # {"shot", "subject", "pose"}
 ```
 
-### Render, encode, pipeline (B1, wave 2)
+### Camera and frame: `engine/scene/camera.py`, `engine/render/frame.py` (owner: pipeline)
 ```python
-# render/frame.py
-def draw_frame(canvas, timeline: dict, cast: dict, t: float, width: int, height: int) -> None
-# render/chunks.py
-def render_chunks(timeline, cast, width, height, fps, chunk_dir: Path, chunk_seconds, preset, crf,
-                  on_chunk_progress, should_cancel, latest_frame_path: Path) -> list[Path]
-# encode/ffmpeg.py
-def encode_video(chunk_paths: list[Path], audio_wav: Path, out_mp4: Path) -> Path
-# pipeline/runner.py
-def run_pipeline(context: PipelineContext) -> dict     # {"output_path", "length_s"}
-# pipeline/storyboard.py
-def run_storyboard(context: PipelineContext) -> dict   # writes files/storyboard/storyboard.json, returns it
+def camera_at(shot: dict, kit: dict, art: dict, width: int, height: int, t: float) -> tuple[float, float, float]
+#   (scale, x, y): screen point = (x + scale * kx, y + scale * ky) for a kit point (kx, ky)
+def shot_label(size: str) -> str
+def draw_frame(canvas, timeline: dict, cast: dict, backgrounds: dict, t: float, width: int, height: int) -> dict
+#   order: render_back -> character (camera) -> desk at the camera's desk_y -> render_foreground -> draw_light
 ```
 
-## Project folder layout (`storage/projects/<id>/`)
+### Pipeline stages (owner: pipeline)
 
-- `project.json`: the project (owned by the app layer).
-- `cache/`: content-hash cache (line WAVs, lip-sync JSON). Kept between runs.
-- `work/`: `timeline.json`, `mix.wav`, `chunks/chunk_000.mp4` (`.part` while writing). Temp files are deleted after encode.
-- `files/`: anything the UI can load through `/api/projects/{id}/files/{path}`: `latest.jpg`,
-  `storyboard/frame_00.jpg` ... , `storyboard/preview.mp4`, `storyboard/storyboard.json`.
-- `job.json`, `cancel.flag`: written by the app layer's job worker.
+`config.yaml` `pipeline: [parse, cast, voice, lipsync, direct, timeline, mix, render, encode]`.
 
-`storyboard.json` matches the API's Storyboard shape, except each frame has `"file": "storyboard/frame_00.jpg"`
-instead of `url`, and `"preview_file"` replaces `preview_url`. The app layer turns files into URLs.
+| Stage | Output |
+|---|---|
+| `parse` | `ParsedScript` |
+| `cast` | `{SPEAKER: normalized character}` (error if a speaker has none) |
+| `voice` | `[{"index", "speaker", "text", "emotion", "intensity", "wav", "duration"}]` (emotion from the script tag via `line_emotion`) |
+| `lipsync` | `[cues per line]` |
+| `direct` | `{"brief", "direction", "backgrounds": {SPEAKER: art}, "generated_backgrounds": {SPEAKER: art}, "provider", "notes", "cost_usd"}`; cached in `cache/direction/<hash>.json` by brief + chosen backgrounds + provider |
+| `timeline` | timeline dict (also saved to `work/timeline.json`) |
+| `mix`, `render`, `encode` | as before |
 
-## Progress events
+`PipelineContext` gains `title: str = ""` and `backgrounds: dict[str, dict | None]`. Storyboard runs
+`parse … timeline, mix` and then draws stills and the preview clip.
 
-`context.on_progress(event)` is called with:
+### Claude layer: `backend/claude_layer/` (owner: claude layer)
 ```python
-{"stage": "render", "stage_state": "active",   # active | done | skipped
- "percent": 64.0,                              # overall 0..100, computed by the runner
- "note": "Part 9 of 14", "message": "Drawing frames, part 9 of 14",
- "chunk": {"done": 8, "total": 14} or None,
- "latest_frame_caption": "1:24, RON, close-up" or None}
+# settings.py
+def claude_settings() -> dict      # from config.yaml "claude:" (lead_model, worker models, effort, limits, api key env)
+# runner.py
+@dataclass
+class ClaudeRun: ok: bool; text: str; cost_usd: float | None; turns: int; error: str | None
+def run_claude(task: str, prompt: str, workspace: Path, on_activity: Callable[[dict], None],
+               should_cancel: Callable[[], bool], tools: list) -> ClaudeRun
+#   Opus 5.5 lead with Sonnet 5.5 / Haiku 5.5 worker subagents; in-process "toonforge" MCP tools; acceptEdits inside the workspace
+#   on_activity({"t": iso, "who": "lead" | "<worker name>", "kind": "note" | "tool" | "delegate" | "result", "text": "..."})
+# tasks: each sets up a workspace, runs Claude, validates and returns the product
+def design_character(inputs: dict, workspace: Path, on_activity, should_cancel) -> dict     # character record (no id)
+def design_background(inputs: dict, workspace: Path, on_activity, should_cancel) -> dict    # background record (no id)
+def write_script(inputs: dict, workspace: Path, on_activity, should_cancel) -> dict         # {"title", "script"}
+class ClaudeDirector(DirectorProvider)                                                       # registered as "claude"
 ```
-Stage labels (`pipeline/registry.py: STAGE_LABELS`): parse "Check script", cast "Load characters", voice "Make voices",
-lipsync "Match mouths", emotion "Set expressions", timeline "Plan shots", mix "Mix audio", render "Draw frames",
-encode "Join and save MP4".
+With `TOONFORGE_FAKE_CLAUDE=1` the runner skips Claude and a fake writes the example files instead, so tests and UI
+work offline.

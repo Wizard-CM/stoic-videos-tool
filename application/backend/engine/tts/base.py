@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from engine.character.rig.controls import emotion_delivery
 from engine.config import load_data_file
+from engine.emotions import emotion_delivery
 from engine.errors import PipelineError
 
 TTS_PROVIDERS: dict[str, type["TTSProvider"]] = {}
@@ -34,7 +34,7 @@ def voice_settings(character: dict, emotion: str, intensity: float) -> dict:
     delivery = emotion_delivery(emotion, intensity)
 
     pitch_semitones = voice["pitch"] * voices_data["pitch_range_semitones"]
-    pitch_semitones += voices_data["age_pitch"].get(character["params"]["age"], 0.0)
+    pitch_semitones += voices_data["age_pitch"].get(character.get("age", "adult"), 0.0)
     pitch_semitones += delivery["pitch"]
 
     slowest, fastest = voices_data["speed_range"]

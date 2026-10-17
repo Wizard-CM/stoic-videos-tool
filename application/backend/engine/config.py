@@ -12,10 +12,23 @@ import yaml
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 APP_ROOT = BACKEND_DIR.parent
 DATA_DIR = BACKEND_DIR / "data"
+EXAMPLES_DIR = DATA_DIR / "examples"  # hand-made example kits, backgrounds and directions (Claude's style references)
 VENDOR_DIR = APP_ROOT / "vendor"
 CONFIG_PATH = Path(os.environ.get("TOONFORGE_CONFIG", APP_ROOT / "config.yaml"))
 
-DEFAULT_PIPELINE = ["parse", "cast", "voice", "lipsync", "emotion", "timeline", "mix", "render", "encode"]
+DEFAULT_PIPELINE = ["parse", "cast", "voice", "lipsync", "direct", "timeline", "mix", "render", "encode"]
+
+# The Claude layer: Opus leads and plans, Sonnet and Haiku workers take the subtasks it hands out.
+DEFAULT_CLAUDE = {
+    "lead_model": "claude-opus-5-5",
+    "workers": {"sonnet": "claude-sonnet-5-5", "haiku": "claude-haiku-5-5"},
+    "effort": "high",
+    "max_turns": 300,
+    "max_budget_usd": None,
+    "max_parallel_workers": 4,
+    "api_key_env": "ANTHROPIC_API_KEY",
+    "cli_path": None,
+}
 
 
 @dataclass
@@ -31,6 +44,7 @@ class EngineConfig:
     x264_crf: int = 20
     storyboard_frame_count: int = 16
     storyboard_preview_seconds: float = 14.0
+    claude: dict = field(default_factory=lambda: dict(DEFAULT_CLAUDE))
     extra: dict = field(default_factory=dict)
 
 
@@ -45,7 +59,7 @@ def load_config() -> EngineConfig:
     return EngineConfig(
         output_folder=Path(os.path.expanduser(raw.get("output_folder") or "~/Videos/ToonForge")),
         pipeline=raw.get("pipeline") or DEFAULT_PIPELINE,
-        providers={"tts": "piper", "lipsync": "rhubarb", "music": "procedural", **raw.get("providers", {})},
+        providers={"tts": "piper", "lipsync": "rhubarb", "music": "procedural", "director": "claude", **raw.get("providers", {})},
         features={"storyboard": True, "music": True, **raw.get("features", {})},
         default_voices={"male": "ryan", "female": "amy", **raw.get("default_voices", {})},
         fps=int(render.get("fps", 24)),
@@ -54,6 +68,7 @@ def load_config() -> EngineConfig:
         x264_crf=int(render.get("x264_crf", 20)),
         storyboard_frame_count=int(storyboard.get("frame_count", 16)),
         storyboard_preview_seconds=float(storyboard.get("preview_seconds", 14)),
+        claude={**DEFAULT_CLAUDE, **(raw.get("claude") or {})},
         extra=raw,
     )
 
